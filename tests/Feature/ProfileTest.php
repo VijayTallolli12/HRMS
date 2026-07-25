@@ -3,13 +3,19 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Volt\Volt;
 use Tests\TestCase;
+use Tests\Traits\RefreshDatabaseAndRoles;
 
 class ProfileTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabaseAndRoles;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seedRolesAndPermissions();
+    }
 
     public function test_profile_page_is_displayed(): void
     {
@@ -79,7 +85,7 @@ class ProfileTest extends TestCase
             ->assertRedirect('/');
 
         $this->assertGuest();
-        $this->assertNull($user->fresh());
+        $this->assertSoftDeleted('users', ['id' => $user->id]);
     }
 
     public function test_correct_password_must_be_provided_to_delete_account(): void

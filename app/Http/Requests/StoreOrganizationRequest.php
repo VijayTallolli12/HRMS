@@ -8,7 +8,7 @@ class StoreOrganizationRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // Authorization handled via policies/permissions
+        return $this->user()->can('create-organization');
     }
 
     public function rules(): array
@@ -16,8 +16,22 @@ class StoreOrganizationRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'legal_name' => 'nullable|string|max:255',
-            'tax_id' => 'nullable|string|max:100',
+            'tax_id' => 'nullable|string|max:100|unique:organizations,tax_id',
             'address' => 'nullable|array',
+            'address.street' => 'nullable|string|max:500',
+            'address.city' => 'nullable|string|max:255',
+            'address.state' => 'nullable|string|max:255',
+            'address.country' => 'nullable|string|max:255',
+            'address.zip' => 'nullable|string|max:20',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Organization name is required.',
+            'name.max' => 'Organization name must not exceed 255 characters.',
+            'tax_id.unique' => 'This tax ID is already registered.',
         ];
     }
 }

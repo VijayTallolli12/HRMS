@@ -11,21 +11,26 @@ class TenantSeeder extends Seeder
 {
     public function run(): void
     {
-        $tenant = Tenant::firstOrCreate([
-            'name' => 'Default',
-        ], [
-            'domain' => null,
-            'meta' => [],
-        ]);
+        $tenant = Tenant::firstOrCreate(
+            ['name' => 'Default'],
+            [
+                'domain' => 'default.hrms.test',
+                'meta' => [],
+            ]
+        );
 
-        $user = User::firstOrCreate([
-            'email' => 'admin@example.com'
-        ], [
-            'name' => 'Administrator',
-            'password' => Hash::make('password'),
-            'tenant_id' => $tenant->id,
-        ]);
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Administrator',
+                'password' => Hash::make('password'),
+                'tenant_id' => $tenant->id,
+                'status' => 'active',
+            ]
+        );
 
-        // Assign admin role later when roles exist.
+        if (method_exists($admin, 'assignRole') && ! $admin->hasRole('super-admin')) {
+            $admin->assignRole('super-admin');
+        }
     }
 }

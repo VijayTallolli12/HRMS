@@ -12,7 +12,7 @@ class IdentifyTenant
     public function handle(Request $request, Closure $next)
     {
         // Simple tenant identification: header `X-Tenant-ID` or env default
-        $tenantId = $request->header('X-Tenant-ID') ?? env('APP_TENANT_ID');
+        $tenantId = $request->header('X-Tenant-ID') ?? config('app.default_tenant_id');
 
         if ($tenantId) {
             $tenant = Tenant::find($tenantId);

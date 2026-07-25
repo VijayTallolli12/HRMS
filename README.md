@@ -1,66 +1,91 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# HRMS - Human Resource Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A multi-tenant HRMS built with Laravel 12, Livewire 3, and Spatie Permission.
 
-## About Laravel
+## Tech Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Framework:** Laravel 12
+- **PHP:** 8.2+
+- **Livewire:** 3.8
+- **RBAC:** Spatie Laravel-Permission 8.3
+- **Testing:** Pest
+- **Code Quality:** PHPStan/Larastan (level 5), Laravel Pint, Rector
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Modules
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Module | Status | Permissions |
+|--------|--------|------------|
+| Tenant | Complete | view, create, update, delete |
+| Organization | Complete | view, create, update, delete |
+| Branch | Complete | view, create, update, delete |
+| Department | Complete | view, create, update, delete |
+| Designation | Complete | view, create, update, delete |
+| Employee | Complete | view, create, update, delete |
 
-## Learning Laravel
+## Architecture
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```
+app/
+  Http/
+    Controllers/    # Resource controllers with authorization
+    Middleware/      # IdentifyTenant
+    Requests/        # Form request validation (12 classes)
+  Models/           # 8 Eloquent models with relationships
+  Repositories/     # 6 repository classes (search, pagination, scoping)
+  Services/         # 6 service classes (business logic)
+  Policies/         # 6 policy classes (authorization)
+  Events/           # 4 domain events
+  Listeners/        # 2 event listeners
+  Notifications/    # 2 notifications
+  Traits/           # Auditable trait
+database/
+  migrations/       # 16 migrations (enhanced with FKs, indexes, constraints)
+  factories/        # 7 model factories
+  seeders/          # 4 seeders (roles, tenants, organizations)
+resources/views/
+  components/       # 19 Blade components (5 shared + 14 original)
+  {module}/         # 4 views per module (index, create, show, edit)
+tests/
+  Unit/             # 3 test files
+  Feature/          # 10 test files
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Setup
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+# Install dependencies
+composer install
 
-## Laravel Sponsors
+# Environment setup
+cp .env.example .env
+php artisan key:generate
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# Database
+php artisan migrate:fresh --seed
 
-### Premium Partners
+# Run tests
+php artisan test
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+# Code quality
+vendor\bin\pint
+vendor\bin\phpstan analyse
+```
 
-## Contributing
+## Roles & Permissions
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Role | Permissions |
+|------|------------|
+| Super Admin | All permissions |
+| HR Manager | Full org/branch/dept/designation/employee CRUD |
+| HR Staff | View all, limited create/update |
+| Branch Manager | Branch-scoped employee management |
+| Employee | View own profile only |
 
-## Code of Conduct
+## Testing
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan test                    # Run all tests
+vendor\bin\pest                     # Run via Pest
+vendor\bin\phpstan analyse          # Static analysis
+vendor\bin\pint                     # Code style fix
+```

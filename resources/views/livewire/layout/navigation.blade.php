@@ -33,6 +33,21 @@ new class extends Component
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('employees.index')" :active="request()->routeIs('employees.*')" wire:navigate>
+                        {{ __('Employees') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('organizations.index')" :active="request()->routeIs('organizations.*')" wire:navigate>
+                        {{ __('Organizations') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('branches.index')" :active="request()->routeIs('branches.*')" wire:navigate>
+                        {{ __('Branches') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('attendances.index')" :active="request()->routeIs('attendances.*')" wire:navigate>
+                        {{ __('Attendance') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('leaves.index')" :active="request()->routeIs('leaves.*')" wire:navigate>
+                        {{ __('Leave') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -83,6 +98,21 @@ new class extends Component
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('employees.index')" :active="request()->routeIs('employees.*')" wire:navigate>
+                {{ __('Employees') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('organizations.index')" :active="request()->routeIs('organizations.*')" wire:navigate>
+                {{ __('Organizations') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('branches.index')" :active="request()->routeIs('branches.*')" wire:navigate>
+                {{ __('Branches') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('attendances.index')" :active="request()->routeIs('attendances.*')" wire:navigate>
+                {{ __('Attendance') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('leaves.index')" :active="request()->routeIs('leaves.*')" wire:navigate>
+                {{ __('Leave') }}
             </x-responsive-nav-link>
         </div>
 

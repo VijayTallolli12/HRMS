@@ -1,0 +1,113 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\StoreEmployeeRequest;
+use App\Http\Requests\UpdateEmployeeRequest;
+use App\Models\Branch;
+use App\Models\Department;
+use App\Models\Designation;
+use App\Models\Employee;
+use App\Models\Organization;
+use App\Services\EmployeeService;
+use Illuminate\Http\Request;
+
+class EmployeeController extends Controller
+{
+    public function __construct(private readonly EmployeeService $service) {}
+
+    public function index(Request $request)
+    {
+        $this->authorize('viewAny', Employee::class);
+
+        $organizations = Organization::orderBy('name')->get();
+        $branches = Branch::orderBy('name')->get();
+        $departments = Department::orderBy('name')->get();
+        $designations = Designation::orderBy('title')->get();
+
+        $organizationId = $request->input('organization_id');
+        $filters = $request->only(['status', 'branch_id', 'department_id']);
+
+        $employees = $this->service->paginateByOrganization(
+            organizationId: $organizationId ?? 0,
+            perPage: $request->integer('per_page', 15),
+            search: $request->input('search'),
+            filters: array_filter($filters)
+        );
+
+        if (! $organizationId) {
+            $employees = $this->service->paginate(
+                perPage: $request->integer('per_page', 15),
+                search: $request->input('search')
+            );
+        }
+
+        return view('employees.index', compact('employees', 'organizations', 'branches', 'departments', 'designations', 'organizationId'));
+    }
+
+    public function create(Request $request)
+    {
+        $this->authorize('create', Employee::class);
+
+        $organizations = Organization::orderBy('name')->get();
+        $branches = Branch::orderBy('name')->get();
+        $departments = Department::orderBy('name')->get();
+        $designations = Designation::orderBy('title')->get();
+
+        return view('employees.create', compact('organizations', 'branches', 'departments', 'designations'))
+            ->with('selectedOrgId', $request->input('organization_id'));
+    }
+
+    public function store(StoreEmployeeRequest $request)
+    {
+        $this->authorize('create', Employee::class);
+
+        $data = $request->validated();
+        $data['created_by'] = $request->user()->id;
+
+        $employee = $this->service->create($data);
+
+        return redirect()
+            ->route('employees.show', $employee)
+            ->with('success', 'Employee created successfully.');
+    }
+
+    public function show(Employee $employee)
+    {
+        $this->authorize('view', $employee);
+        $employee->load(['organization', 'branch', 'department', 'designation', 'creator']);
+
+        return view('employees.show', compact('employee'));
+    }
+
+    public function edit(Employee $employee)
+    {
+        $this->authorize('update', $employee);
+        $organizations = Organization::orderBy('name')->get();
+        $branches = Branch::orderBy('name')->get();
+        $departments = Department::orderBy('name')->get();
+        $designations = Designation::orderBy('title')->get();
+
+        return view('employees.edit', compact('employee', 'organizations', 'branches', 'departments', 'designations'));
+    }
+
+    public function update(UpdateEmployeeRequest $request, Employee $employee)
+    {
+        $this->authorize('update', $employee);
+        $this->service->update($employee, $request->validated());
+
+        return redirect()
+            ->route('employees.show', $employee)
+            ->with('success', 'Employee updated successfully.');
+    }
+
+    public function destroy(Employee $employee)
+    {
+        $this->authorize('delete', $employee);
+        $this->service->delete($employee);
+
+        return redirect()
+            ->route('employees.index')
+            ->with('success', 'Employee deleted successfully.');
+    }
+}
