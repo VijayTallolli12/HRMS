@@ -1,0 +1,1 @@
+Laravel 12, PHP 8.4, MySQL 8, Livewire 3, Tailwind.

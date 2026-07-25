@@ -1,0 +1,5 @@
+# PATTERNS
+
+Purpose
+
+Implementation notes.

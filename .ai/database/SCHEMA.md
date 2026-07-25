@@ -1,0 +1,5 @@
+# SCHEMA
+
+Purpose
+
+Implementation notes.
