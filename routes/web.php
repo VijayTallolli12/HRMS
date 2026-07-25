@@ -24,10 +24,10 @@ use App\Http\Controllers\WorkScheduleController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['identify.tenant'])->group(function () {
-    Route::view('/', 'welcome');
+    Route::get('/', fn () => redirect()->route('login'))->name('home');
 
     Route::view('dashboard', 'dashboard')
-        ->middleware(['auth', 'verified'])
+        ->middleware(['auth'])
         ->name('dashboard');
 
     Route::view('profile', 'profile')
@@ -36,7 +36,7 @@ Route::middleware(['identify.tenant'])->group(function () {
 });
 
 // Protected routes
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::resource('tenants', TenantController::class)->middleware('throttle:60,1');
     Route::resource('organizations', OrganizationController::class)->middleware('throttle:60,1');
     Route::resource('branches', BranchController::class)->middleware('throttle:60,1');

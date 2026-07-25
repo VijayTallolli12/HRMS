@@ -26,11 +26,27 @@ class TenantSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'tenant_id' => $tenant->id,
                 'status' => 'active',
+                'email_verified_at' => now(),
             ]
         );
 
         if (method_exists($admin, 'assignRole') && ! $admin->hasRole('super-admin')) {
             $admin->assignRole('super-admin');
+        }
+
+        $branchAdmin = User::firstOrCreate(
+            ['email' => 'branch@example.com'],
+            [
+                'name' => 'Branch Administrator',
+                'password' => Hash::make('password'),
+                'tenant_id' => $tenant->id,
+                'status' => 'active',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        if (method_exists($branchAdmin, 'assignRole') && ! $branchAdmin->hasRole('branch-admin')) {
+            $branchAdmin->assignRole('branch-admin');
         }
     }
 }
