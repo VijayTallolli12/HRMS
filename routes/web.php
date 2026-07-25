@@ -16,3 +16,5 @@ Route::middleware(['identify.tenant'])->group(function () {
  
 
 require __DIR__.'/auth.php';
+ 
+Route::resource('organizations', App\Http\Controllers\OrganizationController::class)->middleware('auth');
