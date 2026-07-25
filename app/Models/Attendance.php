@@ -26,6 +26,8 @@ class Attendance extends Model
         'early_leave_minutes',
         'notes',
         'created_by',
+        'source',
+        'import_batch_id',
     ];
 
     protected $casts = [
@@ -54,6 +56,21 @@ class Attendance extends Model
     public function adjustments(): HasMany
     {
         return $this->hasMany(AttendanceAdjustment::class);
+    }
+
+    public function importBatch(): BelongsTo
+    {
+        return $this->belongsTo(AttendanceImportBatch::class, 'import_batch_id');
+    }
+
+    public function missingPunches(): HasMany
+    {
+        return $this->hasMany(MissingPunch::class);
+    }
+
+    public function scopeSource($query, string $source)
+    {
+        return $query->where('source', $source);
     }
 
     public function scopeActive($query)

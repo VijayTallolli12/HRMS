@@ -4,13 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreAttendanceRequest;
 use App\Http\Requests\UpdateAttendanceRequest;
-use App\Imports\AttendanceImport;
 use App\Models\Attendance;
+use App\Models\Branch;
 use App\Models\Employee;
-use App\Models\Organization;
 use App\Services\AttendanceService;
 use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
 
 class AttendanceController extends Controller
 {
@@ -20,33 +18,30 @@ class AttendanceController extends Controller
     {
         $this->authorize('viewAny', Attendance::class);
 
-        $organizations = Organization::orderBy('name')->get();
-        $organizationId = $request->input('organization_id');
+        $branches = Branch::orderBy('name')->get();
+        $branchId = $request->input('branch_id');
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
         $status = $request->input('status');
 
-        $attendances = $organizationId
-            ? $this->service->paginateByOrganization($organizationId, $request->integer('per_page', 15), $request->input('search'), $dateFrom, $dateTo, $status)
-            : $this->service->paginate($request->integer('per_page', 15), $request->input('search'), $dateFrom, $dateTo, $status);
+        $attendances = $this->service->paginate(
+            $request->integer('per_page', 15),
+            $request->input('search'),
+            $dateFrom,
+            $dateTo,
+            $status,
+        );
 
-        return view('attendances.index', compact('attendances', 'organizations', 'organizationId'));
+        return view('attendances.index', compact('attendances', 'branches', 'branchId'));
     }
 
     public function create(Request $request)
     {
         $this->authorize('create', Attendance::class);
 
-        $organizations = Organization::orderBy('name')->get();
+        $employees = Employee::where('status', 'active')->orderBy('first_name')->limit(200)->get();
 
-        $employeesQuery = Employee::orderBy('first_name');
-        if ($request->input('organization_id')) {
-            $employeesQuery->where('organization_id', $request->input('organization_id'));
-        }
-        $employees = $employeesQuery->limit(200)->get();
-
-        return view('attendances.create', compact('organizations', 'employees'))
-            ->with('selectedOrgId', $request->input('organization_id'));
+        return view('attendances.create', compact('employees'));
     }
 
     public function store(StoreAttendanceRequest $request)
@@ -55,6 +50,7 @@ class AttendanceController extends Controller
 
         $data = $request->validated();
         $data['created_by'] = $request->user()->id;
+        $data['source'] = 'manual';
 
         $attendance = $this->service->create($data);
 
@@ -67,7 +63,7 @@ class AttendanceController extends Controller
     {
         $attendance = is_numeric($attendance) ? $this->service->find($attendance) : $attendance;
         $this->authorize('view', $attendance);
-        $attendance->load(['organization', 'employee']);
+        $attendance->load(['organization', 'employee', 'adjustments', 'importBatch']);
 
         return view('attendances.show', compact('attendance'));
     }
@@ -76,15 +72,10 @@ class AttendanceController extends Controller
     {
         $attendance = is_numeric($attendance) ? $this->service->find($attendance) : $attendance;
         $this->authorize('update', $attendance);
-        $organizations = Organization::orderBy('name')->get();
 
-        $employeesQuery = Employee::orderBy('first_name');
-        if ($attendance->organization_id) {
-            $employeesQuery->where('organization_id', $attendance->organization_id);
-        }
-        $employees = $employeesQuery->limit(200)->get();
+        $employees = Employee::where('status', 'active')->orderBy('first_name')->limit(200)->get();
 
-        return view('attendances.edit', compact('attendance', 'organizations', 'employees'));
+        return view('attendances.edit', compact('attendance', 'employees'));
     }
 
     public function update(UpdateAttendanceRequest $request, $attendance)
@@ -109,40 +100,20 @@ class AttendanceController extends Controller
             ->with('success', 'Attendance record deleted successfully.');
     }
 
-    public function import(Request $request)
-    {
-        $this->authorize('create', Attendance::class);
-
-        $request->validate([
-            'import_file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
-        ]);
-
-        try {
-            Excel::import(new AttendanceImport($request->user()->id), $request->file('import_file'));
-
-            return redirect()
-                ->route('attendances.index')
-                ->with('success', 'Attendance records imported successfully.');
-        } catch (\Exception $e) {
-            return redirect()
-                ->back()
-                ->with('error', 'Import failed: '.$e->getMessage());
-        }
-    }
-
     public function dailyRegister(Request $request)
     {
         $this->authorize('viewAny', Attendance::class);
 
         $date = $request->input('date', today()->format('Y-m-d'));
-        $organizations = Organization::orderBy('name')->get();
+        $branches = Branch::orderBy('name')->get();
+        $branchId = $request->input('branch_id');
 
         $query = Employee::with(['attendances' => function ($q) use ($date) {
             $q->where('date', $date);
         }])->where('status', 'active');
 
-        if ($request->input('branch_id')) {
-            $query->where('branch_id', $request->input('branch_id'));
+        if ($branchId) {
+            $query->where('branch_id', $branchId);
         }
 
         $employees = $query->orderBy('first_name')->get();
@@ -150,7 +121,11 @@ class AttendanceController extends Controller
         $presentCount = $employees->filter(fn ($e) => $e->attendances->isNotEmpty() && $e->attendances->first()->status !== 'absent')->count();
         $absentCount = $employees->filter(fn ($e) => $e->attendances->isEmpty() || $e->attendances->first()->status === 'absent')->count();
         $lateCount = $employees->filter(fn ($e) => $e->attendances->isNotEmpty() && $e->attendances->first()->status === 'late')->count();
+        $totalHours = $employees->sum(fn ($e) => $e->attendances->first()->hours_worked ?? 0);
 
-        return view('attendances.daily-register', compact('employees', 'date', 'organizations', 'presentCount', 'absentCount', 'lateCount'));
+        return view('attendances.daily-register', compact(
+            'employees', 'date', 'branches', 'branchId',
+            'presentCount', 'absentCount', 'lateCount', 'totalHours'
+        ));
     }
 }

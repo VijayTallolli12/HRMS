@@ -66,11 +66,65 @@
         <li class="mt-6">
             <h3 class="px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Workforce</h3>
             <ul role="list" class="mt-2 space-y-1">
+                @php
+                    $attRoutes = ['attendances.dashboard', 'attendances.import', 'attendances.import', 'attendances.daily-register', 'attendances.reports', 'attendances.corrections', 'missing-punches'];
+                    $isAttendance = str_starts_with($currentRoute, 'attendance') || str_starts_with($currentRoute, 'missing-punch');
+                @endphp
                 <li>
+                    <a href="{{ route('attendances.dashboard') }}" wire:navigate
+                       class="group flex items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {{ $currentRoute === 'attendances.dashboard' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                        <x-heroicon name="chart-bar" class="h-5 w-5 flex-shrink-0 {{ $currentRoute === 'attendances.dashboard' ? 'text-white' : 'text-slate-400 group-hover:text-white' }}" />
+                        Attendance Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('attendances.import.create') }}" wire:navigate
+                       class="group flex items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {{ str_starts_with($currentRoute, 'attendances.import') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                        <x-heroicon name="arrow-up-tray" class="h-5 w-5 flex-shrink-0 {{ str_starts_with($currentRoute, 'attendances.import') ? 'text-white' : 'text-slate-400 group-hover:text-white' }}" />
+                        Import Attendance
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('attendances.daily-register') }}" wire:navigate
+                       class="group flex items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {{ $currentRoute === 'attendances.daily-register' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                        <x-heroicon name="clipboard-document-list" class="h-5 w-5 flex-shrink-0 {{ $currentRoute === 'attendances.daily-register' ? 'text-white' : 'text-slate-400 group-hover:text-white' }}" />
+                        Daily Register
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('attendances.reports.monthly') }}" wire:navigate
+                       class="group flex items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {{ $currentRoute === 'attendances.reports.monthly' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                        <x-heroicon name="calendar-days" class="h-5 w-5 flex-shrink-0 {{ $currentRoute === 'attendances.reports.monthly' ? 'text-white' : 'text-slate-400 group-hover:text-white' }}" />
+                        Monthly Register
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('attendances.corrections.index') }}" wire:navigate
+                       class="group flex items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {{ str_starts_with($currentRoute, 'attendances.corrections') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                        <x-heroicon name="pencil-square" class="h-5 w-5 flex-shrink-0 {{ str_starts_with($currentRoute, 'attendances.corrections') ? 'text-white' : 'text-slate-400 group-hover:text-white' }}" />
+                        Corrections
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('missing-punches.index') }}" wire:navigate
+                       class="group flex items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {{ str_starts_with($currentRoute, 'missing-punches') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                        <x-heroicon name="exclamation-triangle" class="h-5 w-5 flex-shrink-0 {{ str_starts_with($currentRoute, 'missing-punches') ? 'text-white' : 'text-slate-400 group-hover:text-white' }}" />
+                        Missing Punches
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('attendances.reports') }}" wire:navigate
+                       class="group flex items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {{ $currentRoute === 'attendances.reports' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                        <x-heroicon name="document-chart-bar" class="h-5 w-5 flex-shrink-0 {{ $currentRoute === 'attendances.reports' ? 'text-white' : 'text-slate-400 group-hover:text-white' }}" />
+                        Reports
+                    </a>
+                </li>
+
+                <li class="pt-2 border-t border-slate-700/50 mt-2">
                     <a href="{{ route('attendances.index') }}" wire:navigate
-                       class="group flex items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {{ str_starts_with($currentRoute, 'attendance') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
-                        <x-heroicon name="clock" class="h-5 w-5 flex-shrink-0 {{ str_starts_with($currentRoute, 'attendance') ? 'text-white' : 'text-slate-400 group-hover:text-white' }}" />
-                        Attendance
+                       class="group flex items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {{ str_starts_with($currentRoute, 'attendances.index') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                        <x-heroicon name="clock" class="h-5 w-5 flex-shrink-0 {{ str_starts_with($currentRoute, 'attendances.index') ? 'text-white' : 'text-slate-400 group-hover:text-white' }}" />
+                        All Attendance Records
                     </a>
                 </li>
                 <li>

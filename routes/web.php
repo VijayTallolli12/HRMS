@@ -2,6 +2,10 @@
 
 use App\Http\Controllers\AttendanceAdjustmentController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\AttendanceCorrectionController;
+use App\Http\Controllers\AttendanceDashboardController;
+use App\Http\Controllers\AttendanceImportController;
+use App\Http\Controllers\AttendanceReportController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CostCenterController;
 use App\Http\Controllers\DashboardController;
@@ -16,6 +20,7 @@ use App\Http\Controllers\LatePolicyController;
 use App\Http\Controllers\LeaveBalanceController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\LeaveTypeController;
+use App\Http\Controllers\MissingPunchController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\OvertimeRequestController;
 use App\Http\Controllers\Payroll\PayrollRunController;
@@ -67,6 +72,54 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('late-policies', LatePolicyController::class)->middleware('throttle:60,1');
     Route::resource('leaves', LeaveController::class)->middleware('throttle:60,1');
 
+    // Attendance Module
+    Route::get('attendance/dashboard', AttendanceDashboardController::class)
+        ->name('attendances.dashboard');
+    Route::get('attendance/daily-register', [AttendanceController::class, 'dailyRegister'])
+        ->name('attendances.daily-register');
+    Route::get('attendance/corrections', [AttendanceCorrectionController::class, 'index'])
+        ->name('attendances.corrections.index');
+    Route::get('attendance/corrections/{attendance}/edit', [AttendanceCorrectionController::class, 'edit'])
+        ->name('attendances.corrections.edit');
+    Route::put('attendance/corrections/{attendance}', [AttendanceCorrectionController::class, 'update'])
+        ->name('attendances.corrections.update');
+
+    // Attendance Import
+    Route::get('attendance/import', [AttendanceImportController::class, 'create'])
+        ->name('attendances.import.create');
+    Route::post('attendance/import', [AttendanceImportController::class, 'store'])
+        ->name('attendances.import.store');
+    Route::get('attendance/import/history', [AttendanceImportController::class, 'index'])
+        ->name('attendances.import.history');
+    Route::get('attendance/import/{batch}/preview', [AttendanceImportController::class, 'preview'])
+        ->name('attendances.import.preview');
+    Route::post('attendance/import/{batch}/commit', [AttendanceImportController::class, 'commit'])
+        ->name('attendances.import.commit');
+    Route::get('attendance/import/{batch}/results', [AttendanceImportController::class, 'results'])
+        ->name('attendances.import.results');
+    Route::get('attendance/import/template', [AttendanceImportController::class, 'template'])
+        ->name('attendances.import.template');
+    Route::get('attendance/import/{batch}/download-invalid', [AttendanceImportController::class, 'downloadInvalid'])
+        ->name('attendances.import.download-invalid');
+
+    // Missing Punches
+    Route::get('missing-punches', [MissingPunchController::class, 'index'])
+        ->name('missing-punches.index');
+    Route::get('missing-punches/{missingPunch}', [MissingPunchController::class, 'show'])
+        ->name('missing-punches.show');
+    Route::post('missing-punches', [MissingPunchController::class, 'store'])
+        ->name('missing-punches.store');
+    Route::post('missing-punches/{missingPunch}/resolve', [MissingPunchController::class, 'resolve'])
+        ->name('missing-punches.resolve');
+    Route::post('missing-punches/{missingPunch}/dismiss', [MissingPunchController::class, 'dismiss'])
+        ->name('missing-punches.dismiss');
+
+    // Attendance Reports
+    Route::get('attendance/reports', [AttendanceReportController::class, 'index'])
+        ->name('attendances.reports');
+    Route::get('attendance/reports/monthly', [AttendanceReportController::class, 'monthly'])
+        ->name('attendances.reports.monthly');
+
     // User Management
     Route::resource('user-management', UserManagementController::class)->middleware('throttle:60,1');
 
@@ -86,10 +139,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('employees/import', [EmployeeController::class, 'import'])->name('employees.import');
     Route::get('employees/export', [EmployeeController::class, 'export'])->name('employees.export');
     Route::get('employees/import/template', [EmployeeController::class, 'downloadTemplate'])->name('employees.import.template');
-
-    // Attendance imports & daily register
-    Route::post('attendances/import', [AttendanceController::class, 'import'])->name('attendances.import');
-    Route::get('attendances/daily-register', [AttendanceController::class, 'dailyRegister'])->name('attendances.daily-register');
 
     // Leave actions
     Route::post('leaves/{leave}/approve', [LeaveController::class, 'approve'])->name('leaves.approve');

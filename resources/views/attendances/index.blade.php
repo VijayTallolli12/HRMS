@@ -8,14 +8,14 @@
                 <h1 class="text-2xl font-bold text-gray-900">Attendance</h1>
             </div>
             <div class="flex items-center gap-3">
-                <a href="{{ route('attendances.daily-register') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50 transition">
-                    <x-heroicon name="calendar-days" class="w-4 h-4" />
+                <a href="{{ route('attendances.daily-register') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50 transition" wire:navigate>
+                    <x-heroicon name="clipboard-document-list" class="w-4 h-4" />
                     Daily Register
                 </a>
-                <button x-data="{ showImport: false }" @click="showImport = true" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50 transition">
+                <a href="{{ route('attendances.import.create') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50 transition" wire:navigate>
                     <x-heroicon name="arrow-up-tray" class="w-4 h-4" />
                     Import
-                </button>
+                </a>
                 @can('create-attendance')
                     <a href="{{ route('attendances.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 transition">
                         <x-heroicon name="plus" class="w-4 h-4" />

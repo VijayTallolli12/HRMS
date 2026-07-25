@@ -161,7 +161,7 @@
                                     <span class="font-medium">{{ $log->user->name ?? 'System' }}</span>
                                     {{ $log->event }}d a {{ class_basename($log->auditable_type) ?? 'record' }}
                                 </p>
-                                <p class="text-xs text-gray-400 mt-0.5">{{ $log->created_at->diffForHumans() }}</p>
+                                <p class="text-xs text-gray-400 mt-0.5">{{ $log->created_at?->diffForHumans() }}</p>
                             </div>
                         </div>
                     @endforeach
