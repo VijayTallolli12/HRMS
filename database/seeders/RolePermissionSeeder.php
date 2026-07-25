@@ -23,6 +23,9 @@ class RolePermissionSeeder extends Seeder
             'shift', 'shift-assignment', 'work-schedule', 'holiday',
             'weekend-policy', 'reporting-hierarchy', 'cost-center',
             'attendance', 'attendance-adjustment', 'overtime-request', 'late-policy', 'leave',
+            'leave-type', 'leave-balance',
+            'user-management', 'settings',
+            'salary-component', 'salary-structure', 'payroll-run', 'payslip',
         ];
         $actions = ['view', 'create', 'update', 'delete'];
 
@@ -71,6 +74,16 @@ class RolePermissionSeeder extends Seeder
             'view-reporting-hierarchy',
             'view-cost-center',
             'view-late-policy',
+
+            // Leave type and balance (view-only)
+            'view-leave-type',
+            'view-leave-balance',
+
+            // Payroll components (view-only)
+            'view-salary-component',
+            'view-salary-structure',
+            'view-payroll-run',
+            'view-payslip',
         ]);
     }
 }

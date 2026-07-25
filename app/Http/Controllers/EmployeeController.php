@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\EmployeeExport;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
+use App\Imports\EmployeeImport;
 use App\Models\Branch;
 use App\Models\Department;
 use App\Models\Designation;
@@ -11,6 +13,7 @@ use App\Models\Employee;
 use App\Models\Organization;
 use App\Services\EmployeeService;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EmployeeController extends Controller
 {
@@ -109,5 +112,40 @@ class EmployeeController extends Controller
         return redirect()
             ->route('employees.index')
             ->with('success', 'Employee deleted successfully.');
+    }
+
+    public function import(Request $request)
+    {
+        $this->authorize('create', Employee::class);
+
+        $request->validate([
+            'import_file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        try {
+            Excel::import(new EmployeeImport($request->user()->id), $request->file('import_file'));
+
+            return redirect()
+                ->route('employees.index')
+                ->with('success', 'Employees imported successfully.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('error', 'Import failed: '.$e->getMessage());
+        }
+    }
+
+    public function export(Request $request)
+    {
+        $this->authorize('viewAny', Employee::class);
+
+        return Excel::download(new EmployeeExport, 'employees-'.now()->format('Y-m-d').'.xlsx');
+    }
+
+    public function downloadTemplate()
+    {
+        $this->authorize('create', Employee::class);
+
+        return Excel::download(new EmployeeExport(true), 'employee-import-template.xlsx');
     }
 }

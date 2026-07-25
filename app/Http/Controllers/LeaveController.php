@@ -104,4 +104,39 @@ class LeaveController extends Controller
             ->route('leaves.index')
             ->with('success', 'Leave request deleted successfully.');
     }
+
+    public function approve($leave)
+    {
+        $leave = is_numeric($leave) ? $this->service->find($leave) : $leave;
+        $this->authorize('update', $leave);
+
+        $leave->update([
+            'status' => 'approved',
+            'approved_by' => auth()->id(),
+        ]);
+
+        return redirect()
+            ->route('leaves.show', $leave)
+            ->with('success', 'Leave request approved successfully.');
+    }
+
+    public function reject(Request $request, $leave)
+    {
+        $leave = is_numeric($leave) ? $this->service->find($leave) : $leave;
+        $this->authorize('update', $leave);
+
+        $request->validate([
+            'rejection_reason' => 'required|string|max:500',
+        ]);
+
+        $leave->update([
+            'status' => 'rejected',
+            'rejection_reason' => $request->input('rejection_reason'),
+            'approved_by' => auth()->id(),
+        ]);
+
+        return redirect()
+            ->route('leaves.show', $leave)
+            ->with('success', 'Leave request rejected.');
+    }
 }

@@ -2,14 +2,14 @@
 
 @php
     $colors = match($status) {
-        'active' => 'bg-green-100 text-green-800',
-        'inactive' => 'bg-gray-100 text-gray-800',
-        'terminated' => 'bg-red-100 text-red-800',
-        'suspended' => 'bg-yellow-100 text-yellow-800',
-        default => 'bg-gray-100 text-gray-800',
+        'active', 'present', 'approved', 'paid', 'completed' => 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+        'inactive', 'absent', 'rejected', 'terminated', 'cancelled' => 'bg-rose-50 text-rose-700 ring-rose-600/20',
+        'pending', 'processing', 'draft', 'on-hold', 'suspended' => 'bg-amber-50 text-amber-700 ring-amber-600/20',
+        'late', 'half-day', 'remote', 'generated' => 'bg-sky-50 text-sky-700 ring-sky-600/20',
+        default => 'bg-gray-50 text-gray-700 ring-gray-600/20',
     };
 @endphp
 
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $colors }}">
-    {{ ucfirst($status) }}
+<span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset {{ $colors }}">
+    {{ ucfirst(str_replace('-', ' ', $status)) }}
 </span>
