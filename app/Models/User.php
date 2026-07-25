@@ -22,6 +22,7 @@ class User extends Authenticatable implements \Illuminate\Contracts\Auth\MustVer
         'tenant_id',
         'organization_id',
         'branch_id',
+        'employee_id',
         'status',
     ];
 
@@ -51,6 +52,11 @@ class User extends Authenticatable implements \Illuminate\Contracts\Auth\MustVer
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
+    }
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
     }
 
     public function scopeActive($query)

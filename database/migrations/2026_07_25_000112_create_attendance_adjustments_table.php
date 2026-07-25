@@ -18,7 +18,7 @@ return new class extends Migration
             $table->time('new_clock_out')->nullable();
             $table->string('new_status')->nullable();
             $table->string('status')->default('pending');
-            $table->unsignedBigInteger('requested_by');
+            $table->unsignedBigInteger('requested_by')->nullable();
             $table->unsignedBigInteger('approved_by')->nullable();
             $table->text('rejection_reason')->nullable();
             $table->timestamps();

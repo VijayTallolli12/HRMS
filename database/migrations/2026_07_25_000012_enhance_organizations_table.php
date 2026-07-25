@@ -14,9 +14,9 @@ return new class extends Migration
             $table->index('tenant_id');
             $table->unique('name');
             $table->unique('tax_id');
-            $table->unsignedBigInteger('created_by')->nullable()->after('meta');
+            $table->unsignedBigInteger('created_by')->nullable()->after('address');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
-            $table->string('status', 20)->default('active')->after('address');
+            $table->string('status', 20)->default('active')->after('created_by');
         });
     }
 

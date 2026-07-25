@@ -13,6 +13,10 @@ class RolePermissionSeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
+        // V1 Permission Modules
+        // Modules where Branch Admin gets full CRUD: employee, attendance, leave
+        // Modules where Branch Admin gets view-only: everything else
+        // No module gets delete for Branch Admin in V1 (super admin only)
         $modules = [
             'tenant', 'organization', 'branch', 'department', 'designation', 'employee',
             'employment-type', 'employee-category', 'employment-status',
@@ -28,27 +32,45 @@ class RolePermissionSeeder extends Seeder
             }
         }
 
+        // Super Admin: full access to all modules
         $superAdmin = Role::firstOrCreate(['name' => 'super-admin', 'guard_name' => 'web']);
         $superAdmin->givePermissionTo(Permission::all());
 
+        // Branch Admin: scoped to their branch_id
+        // Full CRUD (view/create/update) on: employee, attendance, leave
+        // View-only on: branch, department, designation, employment-type, etc.
+        // No access to: tenant, organization management
+        // No delete permissions in V1
         $branchAdmin = Role::firstOrCreate(['name' => 'branch-admin', 'guard_name' => 'web']);
         $branchAdmin->givePermissionTo([
+            // Employee management (full CRUD within branch, no delete)
             'view-employee', 'create-employee', 'update-employee',
-            'view-branch',
-            'view-department', 'view-designation',
-            'view-employment-type', 'view-employee-category', 'view-employment-status',
-            'view-shift', 'create-shift', 'update-shift',
-            'view-shift-assignment', 'create-shift-assignment', 'update-shift-assignment',
-            'view-work-schedule',
-            'view-holiday', 'create-holiday', 'update-holiday',
-            'view-weekend-policy',
-            'view-reporting-hierarchy', 'create-reporting-hierarchy', 'update-reporting-hierarchy',
-            'view-cost-center',
+
+            // Attendance management (full CRUD within branch, no delete)
             'view-attendance', 'create-attendance', 'update-attendance',
             'view-attendance-adjustment', 'create-attendance-adjustment', 'update-attendance-adjustment',
-            'view-overtime-request', 'create-overtime-request', 'update-overtime-request',
-            'view-late-policy',
+
+            // Leave management (full CRUD within branch, no delete)
             'view-leave', 'create-leave', 'update-leave',
+
+            // Overtime requests (within branch)
+            'view-overtime-request', 'create-overtime-request', 'update-overtime-request',
+
+            // View-only reference data (needed for forms/dropdowns)
+            'view-branch',
+            'view-department',
+            'view-designation',
+            'view-employment-type',
+            'view-employee-category',
+            'view-employment-status',
+            'view-shift',
+            'view-shift-assignment',
+            'view-work-schedule',
+            'view-holiday',
+            'view-weekend-policy',
+            'view-reporting-hierarchy',
+            'view-cost-center',
+            'view-late-policy',
         ]);
     }
 }

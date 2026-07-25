@@ -36,21 +36,20 @@ trait RefreshDatabaseAndRoles
         $branchAdmin = Role::firstOrCreate(['name' => 'branch-admin', 'guard_name' => 'web']);
         $branchAdmin->givePermissionTo([
             'view-employee', 'create-employee', 'update-employee',
-            'view-branch',
-            'view-department', 'view-designation',
-            'view-employment-type', 'view-employee-category', 'view-employment-status',
-            'view-shift', 'create-shift', 'update-shift',
-            'view-shift-assignment', 'create-shift-assignment', 'update-shift-assignment',
-            'view-work-schedule',
-            'view-holiday', 'create-holiday', 'update-holiday',
-            'view-weekend-policy',
-            'view-reporting-hierarchy', 'create-reporting-hierarchy', 'update-reporting-hierarchy',
-            'view-cost-center',
             'view-attendance', 'create-attendance', 'update-attendance',
             'view-attendance-adjustment', 'create-attendance-adjustment', 'update-attendance-adjustment',
             'view-overtime-request', 'create-overtime-request', 'update-overtime-request',
-            'view-late-policy',
             'view-leave', 'create-leave', 'update-leave',
+            'view-branch',
+            'view-department', 'view-designation',
+            'view-employment-type', 'view-employee-category', 'view-employment-status',
+            'view-shift', 'view-shift-assignment',
+            'view-work-schedule',
+            'view-holiday',
+            'view-weekend-policy',
+            'view-reporting-hierarchy',
+            'view-cost-center',
+            'view-late-policy',
         ]);
     }
 }
