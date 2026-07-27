@@ -64,13 +64,13 @@
                                         <span class="text-body text-gray-500">{{ $run->payslips_count ?? $run->payslips()->count() }}</span>
                                     </td>
                                     <td class="text-right">
-                                        <span class="text-body font-medium text-gray-900">${{ number_format($run->total_gross, 2) }}</span>
+                                        <span class="text-body font-medium text-gray-900">{{ \App\Support\Currency::format($run->total_gross) }}</span>
                                     </td>
                                     <td class="text-right">
-                                        <span class="text-body text-red-600">${{ number_format($run->total_deductions, 2) }}</span>
+                                        <span class="text-body text-red-600">{{ \App\Support\Currency::format($run->total_deductions) }}</span>
                                     </td>
                                     <td class="text-right">
-                                        <span class="text-body font-semibold text-emerald-600">${{ number_format($run->total_net, 2) }}</span>
+                                        <span class="text-body font-semibold text-emerald-600">{{ \App\Support\Currency::format($run->total_net) }}</span>
                                     </td>
                                     <td><x-status-badge :status="$run->status" /></td>
                                     <td class="text-right">

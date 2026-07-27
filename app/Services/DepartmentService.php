@@ -19,14 +19,14 @@ class DepartmentService
         return $this->repo->find($id);
     }
 
-    public function paginate(int $perPage = 15, ?string $search = null)
+    public function paginate(int $perPage = 15, ?string $search = null, ?array $filters = null)
     {
-        return $this->repo->paginate($perPage, $search);
+        return $this->repo->paginate($perPage, $search, $filters);
     }
 
-    public function paginateByOrganization(int $organizationId, int $perPage = 15, ?string $search = null)
+    public function paginateByOrganization(int $organizationId, int $perPage = 15, ?string $search = null, ?array $filters = null)
     {
-        return $this->repo->paginateByOrganization($organizationId, $perPage, $search);
+        return $this->repo->paginateByOrganization($organizationId, $perPage, $search, $filters);
     }
 
     public function update(Department $department, array $data): Department
@@ -36,6 +36,10 @@ class DepartmentService
 
     public function delete(Department $department): bool
     {
+        if ($department->employees()->exists()) {
+            throw new \DomainException('Cannot delete a department while employees are assigned.');
+        }
+
         return $this->repo->delete($department);
     }
 

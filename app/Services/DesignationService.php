@@ -19,14 +19,14 @@ class DesignationService
         return $this->repo->find($id);
     }
 
-    public function paginate(int $perPage = 15, ?string $search = null)
+    public function paginate(int $perPage = 15, ?string $search = null, ?array $filters = null)
     {
-        return $this->repo->paginate($perPage, $search);
+        return $this->repo->paginate($perPage, $search, $filters);
     }
 
-    public function paginateByOrganization(int $organizationId, int $perPage = 15, ?string $search = null)
+    public function paginateByOrganization(int $organizationId, int $perPage = 15, ?string $search = null, ?array $filters = null)
     {
-        return $this->repo->paginateByOrganization($organizationId, $perPage, $search);
+        return $this->repo->paginateByOrganization($organizationId, $perPage, $search, $filters);
     }
 
     public function update(Designation $designation, array $data): Designation
@@ -36,6 +36,10 @@ class DesignationService
 
     public function delete(Designation $designation): bool
     {
+        if ($designation->employees()->exists()) {
+            throw new \DomainException('Cannot delete a designation while employees are assigned.');
+        }
+
         return $this->repo->delete($designation);
     }
 

@@ -19,22 +19,59 @@
 
     <div class="max-w-3xl mx-auto">
         <div class="card">
-            <form action="{{ route('designations.update', $designation) }}" method="POST">
+            <form action="{{ route('designations.update', $designation) }}" method="POST" x-data="{ organizationId: '{{ old('organization_id', $designation->organization_id) }}', branchId: '{{ old('branch_id', $designation->branch_id) }}' }">
                 @csrf
                 @method('PUT')
                 <div class="card-body space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div>
+                            <x-input-label for="organization_id" value="Organization *" />
+                            <select id="organization_id" name="organization_id" x-model="organizationId" class="select-field mt-1.5 block w-full" required>
+                                @foreach ($organizations as $org)
+                                    <option value="{{ $org->id }}">{{ $org->name }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error :messages="$errors->get('organization_id')" class="mt-1.5" />
+                        </div>
+                        <div>
+                            <x-input-label for="branch_id" value="Branch *" />
+                            <select id="branch_id" name="branch_id" x-model="branchId" class="select-field mt-1.5 block w-full" required>
+                                @foreach ($branches as $branch)
+                                    <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error :messages="$errors->get('branch_id')" class="mt-1.5" />
+                        </div>
+                        <div>
+                            <x-input-label for="department_id" value="Department *" />
+                            <select id="department_id" name="department_id" class="select-field mt-1.5 block w-full" required>
+                                @foreach ($departments as $dept)
+                                    <option value="{{ $dept->id }}" {{ old('department_id', $designation->department_id) == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error :messages="$errors->get('department_id')" class="mt-1.5" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div>
                         <x-input-label for="title" value="Title *" />
                         <x-text-input id="title" name="title" type="text" class="mt-1.5 block w-full" :value="old('title', $designation->title)" required />
                         <x-input-error :messages="$errors->get('title')" class="mt-1.5" />
                     </div>
                     <div>
+                        <x-input-label for="grade" value="Grade" />
+                        <x-text-input id="grade" name="grade" type="text" class="mt-1.5 block w-full" :value="old('grade', $designation->grade)" />
+                        <x-input-error :messages="$errors->get('grade')" class="mt-1.5" />
+                    </div>
+                    <div>
                         <x-input-label for="level" value="Level" />
                         <x-text-input id="level" name="level" type="text" class="mt-1.5 block w-full" :value="old('level', $designation->level)" />
+                    </div>
                     </div>
                     <div>
                         <x-input-label for="description" value="Description" />
                         <textarea id="description" name="description" rows="3" class="textarea-field mt-1.5 block w-full">{{ old('description', $designation->description) }}</textarea>
+                        <x-input-error :messages="$errors->get('description')" class="mt-1.5" />
                     </div>
                     <div>
                         <x-input-label for="status" value="Status *" />

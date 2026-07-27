@@ -17,7 +17,7 @@ class SettingsForm extends Component
     public string $activeTab = 'general';
 
     public array $settings = [
-        'company_name' => '',
+        'company_name' => 'Blueline Foods India Pvt. Ltd.',
         'address' => '',
         'phone' => '',
         'email' => '',
@@ -33,7 +33,7 @@ class SettingsForm extends Component
         'encryption' => 'tls',
         'date_format' => 'Y-m-d',
         'timezone' => 'UTC',
-        'currency' => 'USD',
+        'currency' => 'INR',
     ];
 
     public $logoUpload = null;

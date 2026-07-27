@@ -19,13 +19,13 @@
 
     <div class="max-w-3xl mx-auto">
         <div class="card">
-            <form action="{{ route('designations.store') }}" method="POST">
+            <form action="{{ route('designations.store') }}" method="POST" x-data="{ branches: @js($branches->map(fn ($branch) => ['id' => $branch->id, 'name' => $branch->name, 'organization_id' => $branch->organization_id])->values()), departments: @js($departments->map(fn ($department) => ['id' => $department->id, 'name' => $department->name, 'branch_id' => $department->branch_id])->values()), organizationId: '{{ old('organization_id', $selectedOrgId ?? $organizations->first()?->id) }}', branchId: '{{ old('branch_id') }}' }">
                 @csrf
                 <div class="card-body space-y-5">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
                             <x-input-label for="organization_id" value="Organization *" />
-                            <select id="organization_id" name="organization_id" class="select-field mt-1.5 block w-full" required>
+                            <select id="organization_id" name="organization_id" x-model="organizationId" class="select-field mt-1.5 block w-full" required>
                                 <option value="">Select Organization</option>
                                 @foreach ($organizations as $org)
                                     <option value="{{ $org->id }}" {{ old('organization_id', $selectedOrgId ?? '') == $org->id ? 'selected' : '' }}>{{ $org->name }}</option>
@@ -34,35 +34,59 @@
                             <x-input-error :messages="$errors->get('organization_id')" class="mt-1.5" />
                         </div>
                         <div>
+                            <x-input-label for="branch_id" value="Branch *" />
+                            <select id="branch_id" name="branch_id" x-model="branchId" class="select-field mt-1.5 block w-full" required>
+                                <option value="">Select Branch</option>
+                                <template x-for="branch in branches.filter((item) => String(item.organization_id) === String(organizationId))" :key="branch.id">
+                                    <option :value="branch.id" x-text="branch.name"></option>
+                                </template>
+                            </select>
+                            <x-input-error :messages="$errors->get('branch_id')" class="mt-1.5" />
+                        </div>
+                        <div>
                             <x-input-label for="department_id" value="Department *" />
                             <select id="department_id" name="department_id" class="select-field mt-1.5 block w-full" required>
                                 <option value="">Select Department</option>
-                                @foreach ($departments as $dept)
-                                    <option value="{{ $dept->id }}" {{ old('department_id') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
-                                @endforeach
+                                <template x-for="department in departments.filter((item) => String(item.branch_id) === String(branchId))" :key="department.id">
+                                    <option :value="department.id" x-text="department.name"></option>
+                                </template>
                             </select>
                             <x-input-error :messages="$errors->get('department_id')" class="mt-1.5" />
                         </div>
                     </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div>
                         <x-input-label for="title" value="Title *" />
                         <x-text-input id="title" name="title" type="text" class="mt-1.5 block w-full" :value="old('title')" required autofocus />
                         <x-input-error :messages="$errors->get('title')" class="mt-1.5" />
                     </div>
                     <div>
+                        <x-input-label for="grade" value="Grade" />
+                        <x-text-input id="grade" name="grade" type="text" class="mt-1.5 block w-full" :value="old('grade')" placeholder="e.g., G1, G2" />
+                        <x-input-error :messages="$errors->get('grade')" class="mt-1.5" />
+                    </div>
+                    <div>
                         <x-input-label for="level" value="Level" />
                         <x-text-input id="level" name="level" type="text" class="mt-1.5 block w-full" :value="old('level')" placeholder="e.g., L1, L2, Senior" />
+                    </div>
                     </div>
                     <div>
                         <x-input-label for="description" value="Description" />
                         <textarea id="description" name="description" rows="3" class="textarea-field mt-1.5 block w-full">{{ old('description') }}</textarea>
+                    </div>
+                    <div>
+                        <x-input-label for="status" value="Status *" />
+                        <select id="status" name="status" class="select-field mt-1.5 block w-full" required>
+                            <option value="active" {{ old('status', 'active') === 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        </select>
                     </div>
                 </div>
                 <div class="card-header border-t border-gray-100 bg-gray-50/50 flex items-center justify-end gap-3">
                     <a href="{{ route('designations.index') }}" class="btn-secondary" wire:navigate>Cancel</a>
                     <x-primary-button type="submit" class="inline-flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                        Create Designation
+                        Add Designation
                     </x-primary-button>
                 </div>
             </form>

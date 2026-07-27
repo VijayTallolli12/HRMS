@@ -19,20 +19,37 @@ class DesignationRepository
 
     public function find(int $id): ?Designation
     {
-        return $this->model->with(['department', 'organization'])->find($id);
+        return $this->model->with(['department', 'branch', 'organization'])->find($id);
     }
 
-    public function paginate(int $perPage = 15, ?string $search = null): LengthAwarePaginator
+    public function paginate(int $perPage = 15, ?string $search = null, ?array $filters = null): LengthAwarePaginator
     {
-        $query = $this->model->with(['department', 'organization']);
+        $query = $this->model->with(['department', 'branch', 'organization'])->withCount('employees');
 
         $this->applyOrganizationScope($query);
+        $this->applyBranchScope($query);
 
         if ($search) {
-            $query->where('title', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('grade', 'like', "%{$search}%")
+                    ->orWhere('level', 'like', "%{$search}%");
+            });
         }
 
-        return $query->latest()->paginate($perPage);
+        if ($filters) {
+            if (! empty($filters['branch_id'])) {
+                $query->where('branch_id', $filters['branch_id']);
+            }
+            if (! empty($filters['department_id'])) {
+                $query->where('department_id', $filters['department_id']);
+            }
+            if (! empty($filters['status'])) {
+                $query->where('status', $filters['status']);
+            }
+        }
+
+        return $query->latest()->paginate($perPage)->withQueryString();
     }
 
     public function paginateByDepartment(int $departmentId, int $perPage = 15, ?string $search = null): LengthAwarePaginator
@@ -46,15 +63,35 @@ class DesignationRepository
         return $query->latest()->paginate($perPage);
     }
 
-    public function paginateByOrganization(int $organizationId, int $perPage = 15, ?string $search = null): LengthAwarePaginator
+    public function paginateByOrganization(int $organizationId, int $perPage = 15, ?string $search = null, ?array $filters = null): LengthAwarePaginator
     {
-        $query = $this->model->where('organization_id', $organizationId);
+        $query = $this->model->with(['department', 'branch', 'organization'])
+            ->withCount('employees')
+            ->where('organization_id', $organizationId);
+
+        $this->applyBranchScope($query);
 
         if ($search) {
-            $query->where('title', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('grade', 'like', "%{$search}%")
+                    ->orWhere('level', 'like', "%{$search}%");
+            });
         }
 
-        return $query->latest()->paginate($perPage);
+        if ($filters) {
+            if (! empty($filters['branch_id'])) {
+                $query->where('branch_id', $filters['branch_id']);
+            }
+            if (! empty($filters['department_id'])) {
+                $query->where('department_id', $filters['department_id']);
+            }
+            if (! empty($filters['status'])) {
+                $query->where('status', $filters['status']);
+            }
+        }
+
+        return $query->latest()->paginate($perPage)->withQueryString();
     }
 
     public function update(Designation $designation, array $data): Designation

@@ -14,10 +14,13 @@ class DepartmentFactory extends Factory
     {
         return [
             'organization_id' => Organization::factory(),
+            'branch_id' => null,
             'name' => fake()->unique()->randomElement([
                 'Human Resources', 'Engineering', 'Marketing', 'Finance',
                 'Operations', 'Sales', 'Legal', 'IT', 'Customer Support',
             ]),
+            'code' => fake()->unique()->bothify('DEP-###'),
+            'department_head_id' => null,
             'description' => fake()->sentence(),
             'status' => 'active',
         ];

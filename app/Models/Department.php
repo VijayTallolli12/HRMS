@@ -15,7 +15,10 @@ class Department extends Model
 
     protected $fillable = [
         'organization_id',
+        'branch_id',
         'name',
+        'code',
+        'department_head_id',
         'description',
         'status',
         'created_by',
@@ -24,6 +27,16 @@ class Department extends Model
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function head(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'department_head_id');
     }
 
     public function creator(): BelongsTo

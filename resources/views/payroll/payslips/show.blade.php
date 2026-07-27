@@ -100,17 +100,17 @@
                         <tbody>
                             <tr>
                                 <td class="font-medium">Basic Salary</td>
-                                <td class="text-right font-semibold">${{ number_format($payslip->basic_salary, 2) }}</td>
+                                <td class="text-right font-semibold">{{ \App\Support\Currency::format($payslip->basic_salary) }}</td>
                             </tr>
                             @foreach($payslip->items->where('type', 'earning') as $earning)
                                 <tr>
                                     <td>{{ $earning->component_name }}</td>
-                                    <td class="text-right font-medium">${{ number_format($earning->amount, 2) }}</td>
+                                    <td class="text-right font-medium">{{ \App\Support\Currency::format($earning->amount) }}</td>
                                 </tr>
                             @endforeach
                             <tr class="bg-gray-50">
                                 <td class="font-bold">Total Earnings</td>
-                                <td class="text-right font-bold text-gray-900">${{ number_format($payslip->gross_earnings, 2) }}</td>
+                                <td class="text-right font-bold text-gray-900">{{ \App\Support\Currency::format($payslip->gross_earnings) }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -139,7 +139,7 @@
                             @forelse($payslip->items->where('type', 'deduction') as $deduction)
                                 <tr>
                                     <td>{{ $deduction->component_name }}</td>
-                                    <td class="text-right font-medium text-red-600">${{ number_format($deduction->amount, 2) }}</td>
+                                    <td class="text-right font-medium text-red-600">{{ \App\Support\Currency::format($deduction->amount) }}</td>
                                 </tr>
                             @empty
                                 <tr>
@@ -148,7 +148,7 @@
                             @endforelse
                             <tr class="bg-gray-50">
                                 <td class="font-bold">Total Deductions</td>
-                                <td class="text-right font-bold text-red-600">${{ number_format($payslip->total_deductions, 2) }}</td>
+                                <td class="text-right font-bold text-red-600">{{ \App\Support\Currency::format($payslip->total_deductions) }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -161,16 +161,16 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-caption font-medium text-gray-400">Net Pay</p>
-                    <p class="text-display font-bold text-white">${{ number_format($payslip->net_salary, 2) }}</p>
+                    <p class="text-display font-bold text-white">{{ \App\Support\Currency::format($payslip->net_salary) }}</p>
                 </div>
                 <div class="text-right space-y-2">
                     <div>
                         <p class="text-caption font-medium text-gray-400">Gross</p>
-                        <p class="text-body font-semibold text-white">${{ number_format($payslip->gross_earnings, 2) }}</p>
+                        <p class="text-body font-semibold text-white">{{ \App\Support\Currency::format($payslip->gross_earnings) }}</p>
                     </div>
                     <div>
                         <p class="text-caption font-medium text-gray-400">Deductions</p>
-                        <p class="text-body font-semibold text-red-400">-${{ number_format($payslip->total_deductions, 2) }}</p>
+                        <p class="text-body font-semibold text-red-400">-{{ \App\Support\Currency::format($payslip->total_deductions) }}</p>
                     </div>
                 </div>
             </div>

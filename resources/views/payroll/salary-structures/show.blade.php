@@ -54,7 +54,7 @@
                     </div>
                     <div>
                         <dt class="text-caption font-medium text-gray-500 mb-1">Basic Salary</dt>
-                        <dd class="text-body font-bold text-gray-900">${{ number_format($structure->basic_salary, 2) }}</dd>
+                        <dd class="text-body font-bold text-gray-900">{{ \App\Support\Currency::format($structure->basic_salary, $structure->currency) }}</dd>
                     </div>
                     <div>
                         <dt class="text-caption font-medium text-gray-500 mb-1">Currency</dt>

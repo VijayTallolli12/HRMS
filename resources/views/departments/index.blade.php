@@ -18,7 +18,7 @@
                 @can('create-department')
                     <a href="{{ route('departments.create') }}" class="btn-primary inline-flex items-center gap-2" wire:navigate>
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                        Create Department
+                        Add Department
                     </a>
                 @endcan
             </x-slot>
@@ -31,6 +31,11 @@
                 {{ session('success') }}
             </div>
         @endif
+        @if (session('error'))
+            <div class="bg-red-50 border border-red-200 rounded-card text-red-700 text-body p-4">
+                {{ session('error') }}
+            </div>
+        @endif
 
         {{-- Filters --}}
         <div class="filter-bar">
@@ -41,12 +46,20 @@
                         <x-search-input name="search" value="{{ request('search') }}" placeholder="Search departments..." />
                     </div>
                     <div class="filter-group min-w-[180px]">
-                        <label class="filter-label">Organization</label>
-                        <select name="organization_id" class="select-field">
-                            <option value="">All Organizations</option>
-                            @foreach ($organizations as $org)
-                                <option value="{{ $org->id }}" {{ $organizationId == $org->id ? 'selected' : '' }}>{{ $org->name }}</option>
+                        <label class="filter-label">Branch</label>
+                        <select name="branch_id" class="select-field">
+                            <option value="">All Branches</option>
+                            @foreach ($branches as $branch)
+                                <option value="{{ $branch->id }}" {{ request('branch_id') == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-group min-w-[140px]">
+                        <label class="filter-label">Status</label>
+                        <select name="status" class="select-field">
+                            <option value="">All Status</option>
+                            <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
                         </select>
                     </div>
                     <div class="filter-group">
@@ -71,7 +84,7 @@
                     @can('create-department')
                         <a href="{{ route('departments.create') }}" class="btn-primary inline-flex items-center gap-2" wire:navigate>
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                            Create Department
+                            Add Department
                         </a>
                     @endcan
                 </x-empty-state>
@@ -80,8 +93,10 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Organization</th>
+                                <th>Department Name</th>
+                                <th>Department Code</th>
+                                <th>Branch</th>
+                                <th>Department Head</th>
                                 <th>Employees</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -93,13 +108,20 @@
                                     <td>
                                         <a href="{{ route('departments.show', $dept) }}" class="text-body font-medium text-gray-900 hover:text-primary-600 transition-colors" wire:navigate>{{ $dept->name }}</a>
                                     </td>
-                                    <td class="text-body text-gray-500">{{ $dept->organization->name ?? '-' }}</td>
+                                    <td class="text-body text-gray-500">{{ $dept->code ?? '-' }}</td>
+                                    <td class="text-body text-gray-500">{{ $dept->branch->name ?? '-' }}</td>
+                                    <td class="text-body text-gray-500">{{ $dept->head?->full_name ?? '-' }}</td>
                                     <td class="text-body text-gray-500">{{ $dept->employees_count ?? $dept->employees->count() }}</td>
                                     <td><x-status-badge :status="$dept->status ?? 'active'" /></td>
                                     <td>
                                         <div class="flex items-center gap-3">
-                                            @can('update-department')
+                                            @can('update', $dept)
                                                 <a href="{{ route('departments.edit', $dept) }}" class="text-caption font-medium text-primary-600 hover:text-primary-700 transition-colors" wire:navigate>Edit</a>
+                                            @endcan
+                                            @can('delete', $dept)
+                                                <x-delete-confirm route="{{ route('departments.destroy', $dept) }}" class="!px-2 !py-1 !text-xs">
+                                                    Delete
+                                                </x-delete-confirm>
                                             @endcan
                                         </div>
                                     </td>

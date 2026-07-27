@@ -149,10 +149,10 @@
                         <div>
                             <x-input-label for="currency" value="Currency" />
                             <select wire:model="settings.currency" id="currency" class="select-field mt-1.5 block w-full">
+                                <option value="INR">INR - Indian Rupee</option>
                                 <option value="USD">USD - US Dollar</option>
                                 <option value="EUR">EUR - Euro</option>
                                 <option value="GBP">GBP - British Pound</option>
-                                <option value="INR">INR - Indian Rupee</option>
                             </select>
                             <x-input-error :messages="$errors->get('settings.currency')" class="mt-1.5" />
                         </div>

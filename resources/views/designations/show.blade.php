@@ -3,7 +3,7 @@
         <x-page-header
             title="{{ $designation->title }}"
             icon="academic-cap"
-            description="{{ $designation->department->name ?? 'Designation' }}{{ $designation->level ? ' · ' . $designation->level : '' }}"
+            description="{{ $designation->department->name ?? 'Designation' }}{{ $designation->level ? ' / ' . $designation->level : '' }}"
         >
             <x-slot name="breadcrumb">
                 <nav class="breadcrumb">
@@ -39,6 +39,14 @@
                     <div>
                         <dt class="text-caption font-medium text-gray-500 mb-1">Department</dt>
                         <dd class="text-body text-gray-900">{{ $designation->department->name ?? '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-caption font-medium text-gray-500 mb-1">Branch</dt>
+                        <dd class="text-body text-gray-900">{{ $designation->branch->name ?? '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-caption font-medium text-gray-500 mb-1">Grade</dt>
+                        <dd class="text-body text-gray-900">{{ $designation->grade ?? '-' }}</dd>
                     </div>
                     <div>
                         <dt class="text-caption font-medium text-gray-500 mb-1">Level</dt>

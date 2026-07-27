@@ -26,9 +26,9 @@ class BrandingService
 
         $appName = $this->clean($settings->get('app_title'))
             ?: $this->clean($settings->get('company_name'))
-            ?: config('app.name', 'HRMS');
+            ?: config('app.name', 'Blueline Foods India Pvt. Ltd.');
 
-        $companyName = $this->clean($settings->get('company_name')) ?: $appName;
+        $companyName = $this->clean($settings->get('company_name')) ?: 'Blueline Foods India Pvt. Ltd.';
 
         return $this->branding = [
             'app_name' => $appName,

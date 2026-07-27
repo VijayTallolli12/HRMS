@@ -76,7 +76,7 @@
                                         <span class="text-body text-gray-500 capitalize">{{ $comp->calculation_type }}</span>
                                     </td>
                                     <td class="text-right">
-                                        <span class="text-body font-medium text-gray-900">${{ number_format($comp->default_value, 2) }}</span>
+                                        <span class="text-body font-medium text-gray-900">{{ \App\Support\Currency::format($comp->default_value) }}</span>
                                     </td>
                                     <td><x-status-badge :status="$comp->is_active ? 'active' : 'inactive'" /></td>
                                     <td class="text-right">

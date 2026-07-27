@@ -16,10 +16,12 @@ class DesignationFactory extends Factory
         return [
             'department_id' => Department::factory(),
             'organization_id' => Organization::factory(),
+            'branch_id' => null,
             'title' => fake()->unique()->randomElement([
                 'Manager', 'Senior Engineer', 'Junior Developer', 'Director',
                 'VP', 'Associate', 'Analyst', 'Specialist', 'Coordinator',
             ]),
+            'grade' => fake()->randomElement(['G1', 'G2', 'G3', 'G4']),
             'level' => fake()->randomElement(['L1', 'L2', 'L3', 'L4', 'L5']),
             'description' => fake()->sentence(),
             'status' => 'active',

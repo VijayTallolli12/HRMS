@@ -38,6 +38,13 @@ class Employee extends Model
         'meta' => 'array',
     ];
 
+    public static function nextEmployeeNumber(): string
+    {
+        $lastId = (int) static::withTrashed()->max('id');
+
+        return 'EMP-'.str_pad((string) ($lastId + 1), 5, '0', STR_PAD_LEFT);
+    }
+
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

@@ -26,7 +26,7 @@
                     </a>
                     <button @click="showImport = true" class="btn-secondary inline-flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-                        Import
+                        Bulk Import
                     </button>
                     @can('create-employee')
                         <a href="{{ route('employees.create') }}" class="btn-primary inline-flex items-center gap-2" wire:navigate>
@@ -80,6 +80,17 @@
     </x-slot>
 
     <div class="space-y-6">
+        @if (session('success'))
+            <div class="bg-emerald-50 border border-emerald-200 rounded-card text-emerald-700 text-body p-4" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="bg-red-50 border border-red-200 rounded-card text-red-700 text-body p-4">
+                {{ session('error') }}
+            </div>
+        @endif
+
         {{-- Filters --}}
         <div class="filter-bar">
             <form action="{{ route('employees.index') }}" method="GET">
@@ -89,11 +100,11 @@
                         <x-search-input name="search" value="{{ request('search') }}" placeholder="Search employees..." />
                     </div>
                     <div class="filter-group min-w-[180px]">
-                        <label class="filter-label">Organization</label>
-                        <select name="organization_id" class="select-field">
-                            <option value="">All Organizations</option>
-                            @foreach ($organizations as $org)
-                                <option value="{{ $org->id }}" {{ $organizationId == $org->id ? 'selected' : '' }}>{{ $org->name }}</option>
+                        <label class="filter-label">Branch</label>
+                        <select name="branch_id" class="select-field">
+                            <option value="">All Branches</option>
+                            @foreach ($branches as $branch)
+                                <option value="{{ $branch->id }}" {{ request('branch_id') == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -103,6 +114,15 @@
                             <option value="">All Departments</option>
                             @foreach ($departments as $dept)
                                 <option value="{{ $dept->id }}" {{ request('department_id') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-group min-w-[140px]">
+                        <label class="filter-label">Designation</label>
+                        <select name="designation_id" class="select-field">
+                            <option value="">All Designations</option>
+                            @foreach ($designations as $designation)
+                                <option value="{{ $designation->id }}" {{ request('designation_id') == $designation->id ? 'selected' : '' }}>{{ $designation->title }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -146,11 +166,17 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Employee</th>
-                                <th>Employee #</th>
-                                <th>Department</th>
+                                <th>Photo</th>
+                                <th>Employee Code</th>
+                                <th>Employee Name</th>
                                 <th>Branch</th>
+                                <th>Department</th>
+                                <th>Designation</th>
+                                <th>Employment Type</th>
+                                <th>Mobile</th>
+                                <th>Email</th>
                                 <th>Status</th>
+                                <th>Joining Date</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -158,26 +184,43 @@
                             @foreach ($employees as $emp)
                                 <tr>
                                     <td>
-                                        <div class="flex items-center gap-3">
-                                            <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-primary-50 text-sm font-bold text-primary-700 border border-primary-100">
-                                                {{ strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name ?? '', 0, 1)) }}
-                                            </span>
-                                            <a href="{{ route('employees.show', $emp) }}" class="text-body font-medium text-gray-900 hover:text-primary-600 transition-colors" wire:navigate>
-                                                {{ $emp->first_name }} {{ $emp->last_name }}
-                                            </a>
-                                        </div>
+                                        <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-primary-50 text-sm font-bold text-primary-700 border border-primary-100">
+                                            {{ strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name ?? '', 0, 1)) }}
+                                        </span>
                                     </td>
                                     <td class="text-body text-gray-500">{{ $emp->employee_number ?? '-' }}</td>
-                                    <td class="text-body text-gray-500">{{ $emp->department->name ?? '-' }}</td>
+                                    <td>
+                                        <a href="{{ route('employees.show', $emp) }}" class="text-body font-medium text-gray-900 hover:text-primary-600 transition-colors" wire:navigate>
+                                            {{ $emp->first_name }} {{ $emp->last_name }}
+                                        </a>
+                                    </td>
                                     <td class="text-body text-gray-500">{{ $emp->branch->name ?? '-' }}</td>
+                                    <td class="text-body text-gray-500">{{ $emp->department->name ?? '-' }}</td>
+                                    <td class="text-body text-gray-500">{{ $emp->designation->title ?? '-' }}</td>
+                                    <td class="text-body text-gray-500">{{ $emp->employmentType->name ?? '-' }}</td>
+                                    <td class="text-body text-gray-500">{{ $emp->phone ?? '-' }}</td>
+                                    <td class="text-body text-gray-500">{{ $emp->email ?? '-' }}</td>
                                     <td><x-status-badge :status="$emp->status ?? 'active'" /></td>
+                                    <td class="text-body text-gray-500">{{ $emp->hired_at?->format('d M Y') ?? '-' }}</td>
                                     <td>
                                         <div class="flex items-center gap-3">
-                                            @can('view-employee')
+                                            @can('view', $emp)
                                                 <a href="{{ route('employees.show', $emp) }}" class="text-caption font-medium text-primary-600 hover:text-primary-700 transition-colors" wire:navigate>View</a>
                                             @endcan
-                                            @can('update-employee')
+                                            @can('update', $emp)
                                                 <a href="{{ route('employees.edit', $emp) }}" class="text-caption font-medium text-primary-600 hover:text-primary-700 transition-colors" wire:navigate>Edit</a>
+                                                @if (($emp->status ?? 'active') === 'active')
+                                                    <form action="{{ route('employees.deactivate', $emp) }}" method="POST" onsubmit="return confirm('Deactivate this employee?')">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="text-caption font-medium text-amber-600 hover:text-amber-700 transition-colors">Deactivate</button>
+                                                    </form>
+                                                @endif
+                                            @endcan
+                                            @can('delete', $emp)
+                                                <x-delete-confirm route="{{ route('employees.destroy', $emp) }}" class="!px-2 !py-1 !text-xs">
+                                                    Delete
+                                                </x-delete-confirm>
                                             @endcan
                                         </div>
                                     </td>

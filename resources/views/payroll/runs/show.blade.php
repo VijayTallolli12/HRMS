@@ -45,7 +45,7 @@
                     </div>
                     <div>
                         <p class="text-caption font-medium text-gray-500">Gross Pay</p>
-                        <p class="text-title font-bold text-gray-900">${{ number_format($run->total_gross, 2) }}</p>
+                        <p class="text-title font-bold text-gray-900">{{ \App\Support\Currency::format($run->total_gross) }}</p>
                     </div>
                 </div>
             </div>
@@ -56,7 +56,7 @@
                     </div>
                     <div>
                         <p class="text-caption font-medium text-gray-500">Total Deductions</p>
-                        <p class="text-title font-bold text-red-600">${{ number_format($run->total_deductions, 2) }}</p>
+                        <p class="text-title font-bold text-red-600">{{ \App\Support\Currency::format($run->total_deductions) }}</p>
                     </div>
                 </div>
             </div>
@@ -67,7 +67,7 @@
                     </div>
                     <div>
                         <p class="text-caption font-medium text-gray-500">Net Pay</p>
-                        <p class="text-title font-bold text-emerald-600">${{ number_format($run->total_net, 2) }}</p>
+                        <p class="text-title font-bold text-emerald-600">{{ \App\Support\Currency::format($run->total_net) }}</p>
                     </div>
                 </div>
             </div>
@@ -111,16 +111,16 @@
                                         <span class="text-body font-medium text-gray-900">{{ $payslip->employee->first_name ?? '' }} {{ $payslip->employee->last_name ?? '-' }}</span>
                                     </td>
                                     <td class="text-right">
-                                        <span class="text-body text-gray-500">${{ number_format($payslip->basic_salary, 2) }}</span>
+                                        <span class="text-body text-gray-500">{{ \App\Support\Currency::format($payslip->basic_salary) }}</span>
                                     </td>
                                     <td class="text-right">
-                                        <span class="text-body font-medium text-gray-900">${{ number_format($payslip->gross_earnings, 2) }}</span>
+                                        <span class="text-body font-medium text-gray-900">{{ \App\Support\Currency::format($payslip->gross_earnings) }}</span>
                                     </td>
                                     <td class="text-right">
-                                        <span class="text-body text-red-600">${{ number_format($payslip->total_deductions, 2) }}</span>
+                                        <span class="text-body text-red-600">{{ \App\Support\Currency::format($payslip->total_deductions) }}</span>
                                     </td>
                                     <td class="text-right">
-                                        <span class="text-body font-semibold text-emerald-600">${{ number_format($payslip->net_salary, 2) }}</span>
+                                        <span class="text-body font-semibold text-emerald-600">{{ \App\Support\Currency::format($payslip->net_salary) }}</span>
                                     </td>
                                     <td><x-status-badge :status="$payslip->status" /></td>
                                     <td class="text-right">

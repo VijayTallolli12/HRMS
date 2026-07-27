@@ -45,10 +45,10 @@
                             <div>
                                 <x-input-label for="currency" value="Currency *" />
                                 <select id="currency" name="currency" class="select-field mt-1.5 block w-full" required>
-                                    <option value="USD" {{ old('currency', 'USD') === 'USD' ? 'selected' : '' }}>USD - US Dollar</option>
+                                    <option value="INR" {{ old('currency', 'INR') === 'INR' ? 'selected' : '' }}>INR - Indian Rupee</option>
+                                    <option value="USD" {{ old('currency') === 'USD' ? 'selected' : '' }}>USD - US Dollar</option>
                                     <option value="EUR" {{ old('currency') === 'EUR' ? 'selected' : '' }}>EUR - Euro</option>
                                     <option value="GBP" {{ old('currency') === 'GBP' ? 'selected' : '' }}>GBP - British Pound</option>
-                                    <option value="INR" {{ old('currency') === 'INR' ? 'selected' : '' }}>INR - Indian Rupee</option>
                                 </select>
                                 <x-input-error :messages="$errors->get('currency')" class="mt-1.5" />
                             </div>

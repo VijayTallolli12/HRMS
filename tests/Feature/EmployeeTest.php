@@ -3,6 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\Employee;
+use App\Models\Branch;
+use App\Models\Department;
+use App\Models\Designation;
 use App\Models\Organization;
 use App\Models\Tenant;
 use App\Models\User;
@@ -21,6 +24,13 @@ class EmployeeTest extends TestCase
         $this->user = User::factory()->forTenant($this->tenant)->create();
         $this->user->assignRole('super-admin');
         $this->organization = Organization::factory()->create(['tenant_id' => $this->tenant->id]);
+        $this->branch = Branch::factory()->create(['organization_id' => $this->organization->id]);
+        $this->department = Department::factory()->create(['organization_id' => $this->organization->id, 'branch_id' => $this->branch->id]);
+        $this->designation = Designation::factory()->create([
+            'organization_id' => $this->organization->id,
+            'branch_id' => $this->branch->id,
+            'department_id' => $this->department->id,
+        ]);
     }
 
     public function test_unauthenticated_user_cannot_view_employees(): void
@@ -39,6 +49,9 @@ class EmployeeTest extends TestCase
         $this->actingAs($this->user)
             ->post(route('employees.store'), [
                 'organization_id' => $this->organization->id,
+                'branch_id' => $this->branch->id,
+                'department_id' => $this->department->id,
+                'designation_id' => $this->designation->id,
                 'first_name' => 'John',
                 'last_name' => 'Doe',
                 'email' => 'john@example.com',
@@ -90,9 +103,19 @@ class EmployeeTest extends TestCase
 
     public function test_authenticated_user_can_update_employee(): void
     {
-        $emp = Employee::factory()->create(['organization_id' => $this->organization->id, 'first_name' => 'Old']);
+        $emp = Employee::factory()->create([
+            'organization_id' => $this->organization->id,
+            'branch_id' => $this->branch->id,
+            'department_id' => $this->department->id,
+            'designation_id' => $this->designation->id,
+            'first_name' => 'Old',
+        ]);
         $this->actingAs($this->user)
             ->put(route('employees.update', $emp), [
+                'organization_id' => $this->organization->id,
+                'branch_id' => $this->branch->id,
+                'department_id' => $this->department->id,
+                'designation_id' => $this->designation->id,
                 'first_name' => 'New',
                 'last_name' => $emp->last_name,
                 'status' => 'active',

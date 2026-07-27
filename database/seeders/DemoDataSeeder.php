@@ -662,7 +662,7 @@ class DemoDataSeeder extends Seeder
                     [
                         'organization_id' => $orgId,
                         'basic_salary' => $basicSalary,
-                        'currency' => 'USD',
+                        'currency' => 'INR',
                         'pay_frequency' => 'monthly',
                         'effective_from' => $emp->hired_at?->format('Y-m-d') ?? now()->subYear()->format('Y-m-d'),
                         'effective_to' => null,
@@ -830,12 +830,12 @@ class DemoDataSeeder extends Seeder
     private function createApplicationSettings(): void
     {
         $settings = [
-            ['key' => 'company_name', 'value' => ['raw' => 'Acme Corporation'], 'group' => 'general'],
+            ['key' => 'company_name', 'value' => ['raw' => 'Blueline Foods India Pvt. Ltd.'], 'group' => 'general'],
             ['key' => 'address', 'value' => ['raw' => '123 Business Ave, Suite 100, New York, NY 10001'], 'group' => 'general'],
             ['key' => 'phone', 'value' => ['raw' => '+1 (555) 123-4567'], 'group' => 'general'],
             ['key' => 'email', 'value' => ['raw' => 'hr@acme.com'], 'group' => 'general'],
             ['key' => 'website', 'value' => ['raw' => 'https://acme.com'], 'group' => 'general'],
-            ['key' => 'app_title', 'value' => ['raw' => 'HRMS - Acme Corporation'], 'group' => 'branding'],
+            ['key' => 'app_title', 'value' => ['raw' => 'Blueline HRMS'], 'group' => 'branding'],
             ['key' => 'primary_color', 'value' => ['raw' => '#4f46e5'], 'group' => 'branding'],
             ['key' => 'smtp_host', 'value' => ['raw' => 'smtp.acme.com'], 'group' => 'email'],
             ['key' => 'smtp_port', 'value' => ['raw' => '587'], 'group' => 'email'],
@@ -844,7 +844,7 @@ class DemoDataSeeder extends Seeder
             ['key' => 'encryption', 'value' => ['raw' => 'tls'], 'group' => 'email'],
             ['key' => 'date_format', 'value' => ['raw' => 'Y-m-d'], 'group' => 'system'],
             ['key' => 'timezone', 'value' => ['raw' => 'UTC'], 'group' => 'system'],
-            ['key' => 'currency', 'value' => ['raw' => 'USD'], 'group' => 'system'],
+            ['key' => 'currency', 'value' => ['raw' => 'INR'], 'group' => 'system'],
         ];
 
         foreach ($settings as $setting) {

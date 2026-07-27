@@ -17,7 +17,7 @@ class SalaryStructureFactory extends Factory
             'employee_id' => Employee::factory(),
             'organization_id' => Organization::factory(),
             'basic_salary' => fake()->randomFloat(2, 3000, 15000),
-            'currency' => 'USD',
+            'currency' => 'INR',
             'pay_frequency' => fake()->randomElement(['monthly', 'bi-weekly', 'weekly']),
             'effective_from' => fake()->dateTimeBetween('-2 years', '-6 months'),
             'effective_to' => null,

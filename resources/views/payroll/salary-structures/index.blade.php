@@ -63,7 +63,7 @@
                                         </a>
                                     </td>
                                     <td class="text-right">
-                                        <span class="text-body font-medium text-gray-900">${{ number_format($structure->basic_salary, 2) }}</span>
+                                        <span class="text-body font-medium text-gray-900">{{ \App\Support\Currency::format($structure->basic_salary, $structure->currency) }}</span>
                                     </td>
                                     <td>
                                         <span class="text-body text-gray-500">{{ $structure->currency }}</span>

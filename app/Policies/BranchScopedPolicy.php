@@ -89,7 +89,7 @@ abstract class BranchScopedPolicy
         if ($user->isBranchAdmin()) {
             if ($this->hasBranch()) {
                 $modelBranchId = $this->getBranchId($model);
-                if ($modelBranchId && $modelBranchId !== $user->branch_id) {
+                if (! $modelBranchId || $modelBranchId !== $user->branch_id) {
                     return false;
                 }
             }

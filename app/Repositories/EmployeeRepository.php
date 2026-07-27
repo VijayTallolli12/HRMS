@@ -19,7 +19,10 @@ class EmployeeRepository
 
     public function find(int $id): ?Employee
     {
-        return $this->model->with(['organization', 'branch', 'department', 'designation', 'creator'])->find($id);
+        return $this->model->with([
+            'organization', 'branch', 'department', 'designation', 'employmentType',
+            'employmentStatus', 'employeeCategory', 'costCenter', 'creator',
+        ])->find($id);
     }
 
     public function paginateByOrganization(int $organizationId, int $perPage = 15, ?string $search = null, ?array $filters = null): LengthAwarePaginator
@@ -50,12 +53,18 @@ class EmployeeRepository
             }
         }
 
-        return $query->latest()->paginate($perPage);
+        if ($filters) {
+            if (isset($filters['designation_id'])) {
+                $query->where('designation_id', $filters['designation_id']);
+            }
+        }
+
+        return $query->latest()->paginate($perPage)->withQueryString();
     }
 
-    public function paginate(int $perPage = 15, ?string $search = null): LengthAwarePaginator
+    public function paginate(int $perPage = 15, ?string $search = null, ?array $filters = null): LengthAwarePaginator
     {
-        $query = $this->model->with(['organization', 'branch', 'department', 'designation']);
+        $query = $this->model->with(['organization', 'branch', 'department', 'designation', 'employmentType']);
 
         $this->applyBranchScope($query, 'branch_id');
 
@@ -68,7 +77,22 @@ class EmployeeRepository
             });
         }
 
-        return $query->latest()->paginate($perPage);
+        if ($filters) {
+            if (isset($filters['status'])) {
+                $query->where('status', $filters['status']);
+            }
+            if (isset($filters['branch_id'])) {
+                $query->where('branch_id', $filters['branch_id']);
+            }
+            if (isset($filters['department_id'])) {
+                $query->where('department_id', $filters['department_id']);
+            }
+            if (isset($filters['designation_id'])) {
+                $query->where('designation_id', $filters['designation_id']);
+            }
+        }
+
+        return $query->latest()->paginate($perPage)->withQueryString();
     }
 
     public function update(Employee $employee, array $data): Employee

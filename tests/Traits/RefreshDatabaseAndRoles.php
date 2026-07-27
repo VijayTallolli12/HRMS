@@ -21,7 +21,9 @@ trait RefreshDatabaseAndRoles
             'shift', 'shift-assignment', 'work-schedule', 'holiday',
             'weekend-policy', 'reporting-hierarchy', 'cost-center',
             'attendance', 'attendance-adjustment', 'overtime-request', 'late-policy', 'leave',
-            'settings',
+            'leave-type', 'leave-balance',
+            'user-management', 'settings',
+            'salary-component', 'salary-structure', 'payroll-run', 'payslip',
         ];
         $actions = ['view', 'create', 'update', 'delete'];
 
@@ -42,7 +44,8 @@ trait RefreshDatabaseAndRoles
             'view-overtime-request', 'create-overtime-request', 'update-overtime-request',
             'view-leave', 'create-leave', 'update-leave',
             'view-branch',
-            'view-department', 'view-designation',
+            'view-department', 'create-department', 'update-department',
+            'view-designation', 'create-designation', 'update-designation',
             'view-employment-type', 'view-employee-category', 'view-employment-status',
             'view-shift', 'view-shift-assignment',
             'view-work-schedule',
@@ -51,6 +54,12 @@ trait RefreshDatabaseAndRoles
             'view-reporting-hierarchy',
             'view-cost-center',
             'view-late-policy',
+            'view-leave-type',
+            'view-leave-balance',
+            'view-salary-component',
+            'view-salary-structure',
+            'view-payroll-run',
+            'view-payslip',
         ]);
     }
 }

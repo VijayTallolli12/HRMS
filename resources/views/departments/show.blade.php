@@ -3,7 +3,7 @@
         <x-page-header
             title="{{ $department->name }}"
             icon="building-office-2"
-            description="{{ $department->organization->name ?? 'Department' }}"
+            description="{{ $department->branch?->name ?? $department->organization->name ?? 'Department' }}"
         >
             <x-slot name="breadcrumb">
                 <nav class="breadcrumb">
@@ -40,6 +40,18 @@
                     <div>
                         <dt class="text-caption font-medium text-gray-500 mb-1">Organization</dt>
                         <dd class="text-body text-gray-900">{{ $department->organization->name ?? '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-caption font-medium text-gray-500 mb-1">Branch</dt>
+                        <dd class="text-body text-gray-900">{{ $department->branch->name ?? '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-caption font-medium text-gray-500 mb-1">Department Code</dt>
+                        <dd class="text-body text-gray-900">{{ $department->code ?? '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-caption font-medium text-gray-500 mb-1">Department Head</dt>
+                        <dd class="text-body text-gray-900">{{ $department->head?->full_name ?? '-' }}</dd>
                     </div>
                     <div>
                         <dt class="text-caption font-medium text-gray-500 mb-1">Status</dt>

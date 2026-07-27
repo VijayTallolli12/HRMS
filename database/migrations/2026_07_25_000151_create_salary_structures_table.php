@@ -13,7 +13,7 @@ return new class extends Migration
             $table->unsignedBigInteger('employee_id')->unique();
             $table->unsignedBigInteger('organization_id');
             $table->decimal('basic_salary', 12, 2);
-            $table->string('currency', 3)->default('USD');
+            $table->string('currency', 3)->default('INR');
             $table->string('pay_frequency');
             $table->date('effective_from');
             $table->date('effective_to')->nullable();

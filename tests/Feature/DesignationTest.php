@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Department;
 use App\Models\Designation;
+use App\Models\Branch;
 use App\Models\Organization;
 use App\Models\Tenant;
 use App\Models\User;
@@ -22,7 +23,8 @@ class DesignationTest extends TestCase
         $this->user = User::factory()->forTenant($this->tenant)->create();
         $this->user->assignRole('super-admin');
         $this->organization = Organization::factory()->create(['tenant_id' => $this->tenant->id]);
-        $this->department = Department::factory()->create(['organization_id' => $this->organization->id]);
+        $this->branch = Branch::factory()->create(['organization_id' => $this->organization->id]);
+        $this->department = Department::factory()->create(['organization_id' => $this->organization->id, 'branch_id' => $this->branch->id]);
     }
 
     public function test_unauthenticated_user_cannot_view_designations(): void
@@ -44,6 +46,7 @@ class DesignationTest extends TestCase
         $this->actingAs($this->user)
             ->post(route('designations.store'), [
                 'organization_id' => $this->organization->id,
+                'branch_id' => $this->branch->id,
                 'department_id' => $this->department->id,
                 'title' => 'Senior Engineer',
                 'level' => 'L4',
@@ -65,11 +68,18 @@ class DesignationTest extends TestCase
     {
         $desig = Designation::factory()->create([
             'organization_id' => $this->organization->id,
+            'branch_id' => $this->branch->id,
             'department_id' => $this->department->id,
             'title' => 'Old',
         ]);
         $this->actingAs($this->user)
-            ->put(route('designations.update', $desig), ['title' => 'New', 'status' => 'active'])
+            ->put(route('designations.update', $desig), [
+                'organization_id' => $this->organization->id,
+                'branch_id' => $this->branch->id,
+                'department_id' => $this->department->id,
+                'title' => 'New',
+                'status' => 'active',
+            ])
             ->assertRedirect();
         $this->assertDatabaseHas('designations', ['id' => $desig->id, 'title' => 'New']);
     }

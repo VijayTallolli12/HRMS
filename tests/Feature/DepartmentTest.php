@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Department;
+use App\Models\Branch;
 use App\Models\Organization;
 use App\Models\Tenant;
 use App\Models\User;
@@ -21,6 +22,7 @@ class DepartmentTest extends TestCase
         $this->user = User::factory()->forTenant($this->tenant)->create();
         $this->user->assignRole('super-admin');
         $this->organization = Organization::factory()->create(['tenant_id' => $this->tenant->id]);
+        $this->branch = Branch::factory()->create(['organization_id' => $this->organization->id]);
     }
 
     public function test_unauthenticated_user_cannot_view_departments(): void
@@ -39,6 +41,7 @@ class DepartmentTest extends TestCase
         $this->actingAs($this->user)
             ->post(route('departments.store'), [
                 'organization_id' => $this->organization->id,
+                'branch_id' => $this->branch->id,
                 'name' => 'Engineering',
             ])->assertRedirect();
         $this->assertDatabaseHas('departments', ['name' => 'Engineering']);
@@ -53,9 +56,14 @@ class DepartmentTest extends TestCase
 
     public function test_authenticated_user_can_update_department(): void
     {
-        $dept = Department::factory()->create(['organization_id' => $this->organization->id, 'name' => 'Old']);
+        $dept = Department::factory()->create(['organization_id' => $this->organization->id, 'branch_id' => $this->branch->id, 'name' => 'Old']);
         $this->actingAs($this->user)
-            ->put(route('departments.update', $dept), ['name' => 'New', 'status' => 'active'])
+            ->put(route('departments.update', $dept), [
+                'organization_id' => $this->organization->id,
+                'branch_id' => $this->branch->id,
+                'name' => 'New',
+                'status' => 'active',
+            ])
             ->assertRedirect();
         $this->assertDatabaseHas('departments', ['id' => $dept->id, 'name' => 'New']);
     }

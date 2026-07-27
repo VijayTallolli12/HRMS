@@ -141,6 +141,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('employees/import', [EmployeeController::class, 'import'])->name('employees.import');
     Route::get('employees/export', [EmployeeController::class, 'export'])->name('employees.export');
     Route::get('employees/import/template', [EmployeeController::class, 'downloadTemplate'])->name('employees.import.template');
+    Route::patch('employees/{employee}/deactivate', [EmployeeController::class, 'deactivate'])->name('employees.deactivate');
 
     // Leave actions
     Route::post('leaves/{leave}/approve', [LeaveController::class, 'approve'])->name('leaves.approve');

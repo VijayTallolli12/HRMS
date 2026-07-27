@@ -40,8 +40,7 @@ class RolePermissionSeeder extends Seeder
         $superAdmin->givePermissionTo(Permission::all());
 
         // Branch Admin: scoped to their branch_id
-        // Full CRUD (view/create/update) on: employee, attendance, leave
-        // View-only on: branch, department, designation, employment-type, etc.
+        // Manage employee master data and daily HR operations within branch; no delete in V1.
         // No access to: tenant, organization management
         // No delete permissions in V1
         $branchAdmin = Role::firstOrCreate(['name' => 'branch-admin', 'guard_name' => 'web']);
@@ -61,8 +60,8 @@ class RolePermissionSeeder extends Seeder
 
             // View-only reference data (needed for forms/dropdowns)
             'view-branch',
-            'view-department',
-            'view-designation',
+            'view-department', 'create-department', 'update-department',
+            'view-designation', 'create-designation', 'update-designation',
             'view-employment-type',
             'view-employee-category',
             'view-employment-status',

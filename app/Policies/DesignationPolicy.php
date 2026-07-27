@@ -8,9 +8,4 @@ class DesignationPolicy extends BranchScopedPolicy
     {
         return 'designation';
     }
-
-    protected function hasBranch(): bool
-    {
-        return false;
-    }
 }

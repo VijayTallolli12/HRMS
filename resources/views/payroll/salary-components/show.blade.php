@@ -58,7 +58,7 @@
                     </div>
                     <div>
                         <dt class="text-caption font-medium text-gray-500 mb-1">Default Value</dt>
-                        <dd class="text-body font-semibold text-gray-900">${{ number_format($comp->default_value, 2) }}</dd>
+                        <dd class="text-body font-semibold text-gray-900">{{ \App\Support\Currency::format($comp->default_value) }}</dd>
                     </div>
                     <div>
                         <dt class="text-caption font-medium text-gray-500 mb-1">Status</dt>
