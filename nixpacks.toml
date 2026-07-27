@@ -1,6 +1,48 @@
-[phases.setup]
-nixPkgs = ["php83", "php83Extensions.gd", "php83Extensions.zip", "unzip"]
-
 [variables]
-NIXPACKS_PHP_VERSION = "8.3"
 COMPOSER_ALLOW_SUPERUSER = "1"
+COMPOSER_NO_INTERACTION = "1"
+NIXPACKS_PHP_ROOT_DIR = "/app/public"
+
+[phases.setup]
+nixPkgs = [
+    "php83",
+    "php83Extensions.pdo",
+    "php83Extensions.pdo_mysql",
+    "php83Extensions.pdo_sqlite",
+    "php83Extensions.gd",
+    "php83Extensions.zip",
+    "php83Extensions.xml",
+    "php83Extensions.mbstring",
+    "php83Extensions.curl",
+    "php83Extensions.bcmath",
+    "php83Extensions.sockets",
+    "php83Extensions.tokenizer",
+    "php83Extensions.fileinfo",
+    "php83Extensions.exif",
+    "php83Extensions.intl",
+    "php83Extensions.dom",
+    "php83Extensions.simplexml",
+    "php83Extensions.xmlreader",
+    "php83Extensions.xmlwriter",
+    "php83Extensions.zlib",
+    "php83Extensions.iconv",
+    "nodejs",
+    "unzip",
+]
+
+[phases.install]
+cmds = [
+    "composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist",
+]
+
+[phases.build]
+cmds = [
+    "npm ci",
+    "npm run build",
+    "php artisan config:cache",
+    "php artisan route:cache",
+    "php artisan view:cache",
+]
+
+[start]
+cmd = "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT"
