@@ -15,6 +15,8 @@ class PayrollRunController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('view-payroll-run');
+
         $runs = $this->service->paginate(
             perPage: $request->integer('per_page', 15),
             search: $request->input('search')
@@ -25,6 +27,8 @@ class PayrollRunController extends Controller
 
     public function create()
     {
+        $this->authorize('create-payroll-run');
+
         $employees = Employee::orderBy('first_name')->get();
 
         return view('payroll.runs.create', compact('employees'));
@@ -32,6 +36,7 @@ class PayrollRunController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create-payroll-run');
         $data = $request->validate([
             'organization_id' => 'required|exists:organizations,id',
             'branch_id' => 'nullable|exists:branches,id',
@@ -53,6 +58,8 @@ class PayrollRunController extends Controller
 
     public function show(PayrollRun $run)
     {
+        $this->authorize('view-payroll-run');
+
         $run->load(['organization', 'branch', 'processor', 'payslips.employee']);
 
         return view('payroll.runs.show', compact('run'));
@@ -60,6 +67,7 @@ class PayrollRunController extends Controller
 
     public function destroy(PayrollRun $run)
     {
+        $this->authorize('delete-payroll-run');
         $this->service->delete($run);
 
         return redirect()
@@ -67,10 +75,10 @@ class PayrollRunController extends Controller
             ->with('success', 'Payroll run deleted successfully.');
     }
 
-    public function showPayslip(PayrollRun $run, Payslip $payslip)
+    public function showPayslip(Payslip $payslip)
     {
-        $payslip->load(['employee', 'items.salaryComponent']);
+        $payslip->load(['employee', 'employee.department', 'employee.designation', 'items.salaryComponent', 'payrollRun']);
 
-        return view('payroll.runs.payslip', ['run' => $run, 'payslip' => $payslip]);
+        return view('payroll.payslips.show', ['run' => $payslip->payrollRun, 'payslip' => $payslip]);
     }
 }

@@ -21,6 +21,7 @@ trait RefreshDatabaseAndRoles
             'shift', 'shift-assignment', 'work-schedule', 'holiday',
             'weekend-policy', 'reporting-hierarchy', 'cost-center',
             'attendance', 'attendance-adjustment', 'overtime-request', 'late-policy', 'leave',
+            'settings',
         ];
         $actions = ['view', 'create', 'update', 'delete'];
 

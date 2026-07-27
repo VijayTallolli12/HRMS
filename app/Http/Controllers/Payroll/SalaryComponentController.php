@@ -13,23 +13,29 @@ class SalaryComponentController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('view-salary-component');
+
         $components = $this->service->paginate(
             perPage: $request->integer('per_page', 15),
             search: $request->input('search')
         );
 
-        return view('payroll.components.index', compact('components'));
+        return view('payroll.salary-components.index', compact('components'));
     }
 
     public function create()
     {
-        return view('payroll.components.create');
+        $this->authorize('create-salary-component');
+
+        return view('payroll.salary-components.create');
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create-salary-component');
+
         $data = $request->validate([
-            'organization_id' => 'required|exists:organizations,id',
+            'organization_id' => 'nullable|exists:organizations,id',
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50|unique:salary_components,code',
             'type' => 'required|in:earning,deduction,benefit',
@@ -43,24 +49,35 @@ class SalaryComponentController extends Controller
         $component = $this->service->create($data);
 
         return redirect()
-            ->route('payroll.components.index')
+            ->route('payroll.salary-components.index')
             ->with('success', 'Salary component created successfully.');
     }
 
-    public function show(SalaryComponent $component)
+    public function show($salary_component)
     {
+        $this->authorize('view-salary-component');
+
+        $component = SalaryComponent::findOrFail($salary_component);
         $component->load('organization');
 
-        return view('payroll.components.show', compact('component'));
+        return view('payroll.salary-components.show', ['comp' => $component]);
     }
 
-    public function edit(SalaryComponent $component)
+    public function edit($salary_component)
     {
-        return view('payroll.components.edit', compact('component'));
+        $this->authorize('update-salary-component');
+
+        $component = SalaryComponent::findOrFail($salary_component);
+
+        return view('payroll.salary-components.edit', ['comp' => $component]);
     }
 
-    public function update(Request $request, SalaryComponent $component)
+    public function update(Request $request, $salary_component)
     {
+        $this->authorize('update-salary-component');
+
+        $component = SalaryComponent::findOrFail($salary_component);
+
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50|unique:salary_components,code,'.$component->id,
@@ -75,16 +92,19 @@ class SalaryComponentController extends Controller
         $this->service->update($component, $data);
 
         return redirect()
-            ->route('payroll.components.index')
+            ->route('payroll.salary-components.index')
             ->with('success', 'Salary component updated successfully.');
     }
 
-    public function destroy(SalaryComponent $component)
+    public function destroy($salary_component)
     {
+        $this->authorize('delete-salary-component');
+
+        $component = SalaryComponent::findOrFail($salary_component);
         $this->service->delete($component);
 
         return redirect()
-            ->route('payroll.components.index')
+            ->route('payroll.salary-components.index')
             ->with('success', 'Salary component deleted successfully.');
     }
 }

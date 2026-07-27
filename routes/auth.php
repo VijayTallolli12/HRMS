@@ -19,7 +19,7 @@ Route::middleware('auth')->group(function () {
         ->name('password.confirm');
 
     Route::post('logout', function () {
-        Auth::guard('web')->logout();
+        auth()->guard('web')->logout();
         session()->invalidate();
         session()->regenerateToken();
 

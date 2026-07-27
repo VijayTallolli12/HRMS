@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LeaveBalance;
+use App\Models\LeaveType;
 use App\Services\LeaveBalanceService;
 use Illuminate\Http\Request;
 
@@ -15,12 +16,13 @@ class LeaveBalanceController extends Controller
         $this->authorize('viewAny', LeaveBalance::class);
 
         $employeeId = $request->input('employee_id');
+        $leaveTypes = LeaveType::orderBy('name')->get();
 
         $balances = $employeeId
             ? $this->service->paginateByEmployee($employeeId, $request->integer('per_page', 15), $request->input('search'))
             : $this->service->paginate($request->integer('per_page', 15), $request->input('search'));
 
-        return view('leave-balances.index', compact('balances', 'employeeId'));
+        return view('leave-balances.index', compact('balances', 'employeeId', 'leaveTypes'));
     }
 
     public function show(LeaveBalance $leaveBalance)

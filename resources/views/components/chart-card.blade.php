@@ -1,8 +1,8 @@
 @props(['title' => '', 'height' => '300px'])
 
-<div {{ $attributes->merge(['class' => 'bg-white rounded-xl border border-gray-200 shadow-sm p-6']) }}>
+<div {{ $attributes->merge(['class' => 'card p-6']) }}>
     @if($title)
-        <h3 class="text-sm font-semibold text-gray-900 mb-4">{{ $title }}</h3>
+        <h3 class="text-section text-gray-900 mb-5">{{ $title }}</h3>
     @endif
     <div style="height: {{ $height }}">
         {{ $slot }}

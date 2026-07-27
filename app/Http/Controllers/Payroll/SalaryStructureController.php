@@ -14,26 +14,32 @@ class SalaryStructureController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('view-salary-structure');
+
         $structures = $this->service->paginate(
             perPage: $request->integer('per_page', 15),
             search: $request->input('search')
         );
 
-        return view('payroll.structures.index', compact('structures'));
+        return view('payroll.salary-structures.index', compact('structures'));
     }
 
     public function create()
     {
+        $this->authorize('create-salary-structure');
+
         $employees = Employee::orderBy('first_name')->get();
 
-        return view('payroll.structures.create', compact('employees'));
+        return view('payroll.salary-structures.create', compact('employees'));
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create-salary-structure');
+
         $data = $request->validate([
             'employee_id' => 'required|exists:employees,id|unique:salary_structures,employee_id',
-            'organization_id' => 'required|exists:organizations,id',
+            'organization_id' => 'nullable|exists:organizations,id',
             'basic_salary' => 'required|numeric|min:0',
             'currency' => 'required|string|max:3',
             'pay_frequency' => 'required|in:monthly,weekly,biweekly',
@@ -47,26 +53,36 @@ class SalaryStructureController extends Controller
         $structure = $this->service->create($data);
 
         return redirect()
-            ->route('payroll.structures.show', $structure)
+            ->route('payroll.salary-structures.show', $structure)
             ->with('success', 'Salary structure created successfully.');
     }
 
-    public function show(SalaryStructure $structure)
+    public function show($salary_structure)
     {
+        $this->authorize('view-salary-structure');
+
+        $structure = SalaryStructure::findOrFail($salary_structure);
         $structure->load(['employee', 'organization', 'components.salaryComponent']);
 
-        return view('payroll.structures.show', compact('structure'));
+        return view('payroll.salary-structures.show', compact('structure'));
     }
 
-    public function edit(SalaryStructure $structure)
+    public function edit($salary_structure)
     {
+        $this->authorize('update-salary-structure');
+
+        $structure = SalaryStructure::findOrFail($salary_structure);
         $employees = Employee::orderBy('first_name')->get();
 
-        return view('payroll.structures.edit', compact('structure', 'employees'));
+        return view('payroll.salary-structures.edit', compact('structure', 'employees'));
     }
 
-    public function update(Request $request, SalaryStructure $structure)
+    public function update(Request $request, $salary_structure)
     {
+        $this->authorize('update-salary-structure');
+
+        $structure = SalaryStructure::findOrFail($salary_structure);
+
         $data = $request->validate([
             'basic_salary' => 'required|numeric|min:0',
             'currency' => 'required|string|max:3',
@@ -81,16 +97,19 @@ class SalaryStructureController extends Controller
         $this->service->update($structure, $data);
 
         return redirect()
-            ->route('payroll.structures.show', $structure)
+            ->route('payroll.salary-structures.show', $structure)
             ->with('success', 'Salary structure updated successfully.');
     }
 
-    public function destroy(SalaryStructure $structure)
+    public function destroy($salary_structure)
     {
+        $this->authorize('delete-salary-structure');
+
+        $structure = SalaryStructure::findOrFail($salary_structure);
         $this->service->delete($structure);
 
         return redirect()
-            ->route('payroll.structures.index')
+            ->route('payroll.salary-structures.index')
             ->with('success', 'Salary structure deleted successfully.');
     }
 }

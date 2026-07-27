@@ -1,74 +1,80 @@
 <x-app-layout>
-    <x-page-header title="Import History" icon="clock" :breadcrumb="[
-        ['label' => 'Attendance Dashboard', 'route' => 'attendances.dashboard'],
-        ['label' => 'Import History'],
-    ]">
-        <x-slot:actions>
+    <x-page-header title="Import History" icon="clock">
+        <x-slot name="breadcrumb">
+            <a href="{{ route('dashboard') }}" wire:navigate>Home</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="{{ route('attendances.dashboard') }}" wire:navigate>Attendance</a>
+            <span class="breadcrumb-separator">/</span>
+            <span>Import History</span>
+        </x-slot>
+        <x-slot name="actions">
             <a href="{{ route('attendances.import.create') }}" class="btn-primary" wire:navigate>
-                <x-heroicon name="arrow-up-tray" class="w-4 h-4" />
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
                 New Import
             </a>
-        </x-slot:actions>
+        </x-slot>
     </x-page-header>
 
-    <div class="card overflow-hidden">
+    <div class="card card-hover">
         <div class="overflow-x-auto">
-            <table class="min-w-full">
+            <table class="data-table">
                 <thead>
-                    <tr class="table-header">
-                        <th class="table-header-cell">Batch</th>
-                        <th class="table-header-cell">Filename</th>
-                        <th class="table-header-cell">Type</th>
-                        <th class="table-header-cell">Total</th>
-                        <th class="table-header-cell">Valid</th>
-                        <th class="table-header-cell">Invalid</th>
-                        <th class="table-header-cell">Status</th>
-                        <th class="table-header-cell">Imported By</th>
-                        <th class="table-header-cell">Date</th>
-                        <th class="table-header-cell">Actions</th>
+                    <tr>
+                        <th>Batch</th>
+                        <th>Filename</th>
+                        <th>Type</th>
+                        <th>Total</th>
+                        <th>Valid</th>
+                        <th>Invalid</th>
+                        <th>Status</th>
+                        <th>Imported By</th>
+                        <th>Date</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody>
                     @forelse($batches as $batch)
-                        <tr class="table-row">
-                            <td class="table-cell font-medium">#{{ $batch->id }}</td>
-                            <td class="table-cell">{{ $batch->filename }}</td>
-                            <td class="table-cell uppercase text-xs">{{ $batch->file_type }}</td>
-                            <td class="table-cell">{{ $batch->total_rows }}</td>
-                            <td class="table-cell text-emerald-600 font-medium">{{ $batch->valid_rows }}</td>
-                            <td class="table-cell {{ $batch->invalid_rows > 0 ? 'text-rose-600 font-medium' : '' }}">{{ $batch->invalid_rows }}</td>
-                            <td class="table-cell">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                                    {{ $batch->status === 'completed' ? 'bg-emerald-100 text-emerald-700' : '' }}
-                                    {{ $batch->status === 'preview' ? 'bg-amber-100 text-amber-700' : '' }}
-                                    {{ $batch->status === 'processing' ? 'bg-sky-100 text-sky-700' : '' }}
-                                    {{ $batch->status === 'pending' ? 'bg-gray-100 text-gray-600' : '' }}">
+                        <tr>
+                            <td class="font-medium">#{{ $batch->id }}</td>
+                            <td>{{ $batch->filename }}</td>
+                            <td class="uppercase text-caption">{{ $batch->file_type }}</td>
+                            <td>{{ $batch->total_rows }}</td>
+                            <td class="text-emerald-600 font-medium">{{ $batch->valid_rows }}</td>
+                            <td class="{{ $batch->invalid_rows > 0 ? 'text-red-600 font-medium' : '' }}">{{ $batch->invalid_rows }}</td>
+                            <td>
+                                <span class="badge-{{ $batch->status === 'completed' ? 'success' : ($batch->status === 'preview' ? 'warning' : ($batch->status === 'processing' ? 'info' : 'default')) }}">
                                     {{ ucfirst($batch->status) }}
                                 </span>
                             </td>
-                            <td class="table-cell">{{ $batch->importer->name ?? '-' }}</td>
-                            <td class="table-cell text-gray-500">{{ $batch->created_at->format('M d, Y H:i') }}</td>
-                            <td class="table-cell">
-                                <div class="flex gap-2">
+                            <td>{{ $batch->importer->name ?? '-' }}</td>
+                            <td class="text-caption text-gray-500">{{ $batch->created_at->format('M d, Y H:i') }}</td>
+                            <td>
+                                <div class="flex items-center gap-2">
                                     @if($batch->status === 'preview')
-                                        <a href="{{ route('attendances.import.preview', $batch) }}" class="text-indigo-600 hover:text-indigo-500 text-xs font-medium" wire:navigate>Preview</a>
+                                        <a href="{{ route('attendances.import.preview', $batch) }}" class="btn-ghost text-xs px-2.5 py-1" wire:navigate>Preview</a>
                                     @endif
                                     @if($batch->status === 'completed')
-                                        <a href="{{ route('attendances.import.results', $batch) }}" class="text-indigo-600 hover:text-indigo-500 text-xs font-medium" wire:navigate>Results</a>
+                                        <a href="{{ route('attendances.import.results', $batch) }}" class="btn-ghost text-xs px-2.5 py-1" wire:navigate>Results</a>
                                     @endif
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10" class="px-6 py-12 text-center text-sm text-gray-500">No import history yet.</td>
+                            <td colspan="10">
+                                <div class="empty-state">
+                                    <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <p class="text-title text-gray-900 mb-1">No import history</p>
+                                    <p class="text-caption text-gray-500">Get started by importing your first attendance file.</p>
+                                </div>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
         @if($batches->hasPages())
-            <div class="px-6 py-3 border-t border-gray-100">{{ $batches->links() }}</div>
+            <div class="px-6 py-4 border-t border-gray-100">{{ $batches->links() }}</div>
         @endif
     </div>
 </x-app-layout>

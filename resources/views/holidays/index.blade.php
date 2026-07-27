@@ -1,98 +1,103 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Holidays</h2>
+    <x-page-header title="Holidays" description="Manage company holidays, public holidays, and optional time off." icon="cake">
+        <x-slot name="breadcrumb">
+            <a href="{{ route('dashboard') }}" wire:navigate>Home</a>
+            <span class="breadcrumb-separator">/</span>
+            <span>Workforce</span>
+            <span class="breadcrumb-separator">/</span>
+            <span>Holidays</span>
+        </x-slot>
+        <x-slot name="actions">
             @can('create-holiday')
-                <a href="{{ route('holidays.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150" wire:navigate>
+                <a href="{{ route('holidays.create') }}" class="btn-primary" wire:navigate>
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                     Create Holiday
                 </a>
             @endcan
-        </div>
-    </x-slot>
+        </x-slot>
+    </x-page-header>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @if (session('success'))
-                <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-md text-green-700" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
-                    {{ session('success') }}
+    <div class="space-y-5">
+        <div class="filter-bar">
+            <form action="{{ route('holidays.index') }}" method="GET" class="filter-bar-inner">
+                <div class="filter-group flex-1 min-w-[200px]">
+                    <label class="filter-label">Search</label>
+                    <input type="text" name="search" value="{{ request('search') }}" class="input-field" placeholder="Search holidays..." />
                 </div>
-            @endif
+                <div class="filter-group min-w-[180px]">
+                    <label class="filter-label">Organization</label>
+                    <select name="organization_id" class="select-field">
+                        <option value="">All Organizations</option>
+                        @foreach ($organizations as $organization)
+                            <option value="{{ $organization->id }}" {{ request('organization_id') == $organization->id ? 'selected' : '' }}>{{ $organization->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="filter-group min-w-[150px]">
+                    <label class="filter-label">Type</label>
+                    <select name="type" class="select-field">
+                        <option value="">All Types</option>
+                        <option value="public" {{ request('type') == 'public' ? 'selected' : '' }}>Public</option>
+                        <option value="optional" {{ request('type') == 'optional' ? 'selected' : '' }}>Optional</option>
+                        <option value="company" {{ request('type') == 'company' ? 'selected' : '' }}>Company</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Filter</button>
+            </form>
+        </div>
 
-            <div class="mb-6">
-                <form action="{{ route('holidays.index') }}" method="GET" class="flex gap-2 flex-wrap">
-                    <div class="flex-1 min-w-[200px]">
-                        <x-search-input name="search" value="{{ request('search') }}" placeholder="Search holidays..." />
-                    </div>
-                    <div class="min-w-[180px]">
-                        <select name="organization_id" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm">
-                            <option value="">All Organizations</option>
-                            @foreach ($organizations as $organization)
-                                <option value="{{ $organization->id }}" {{ request('organization_id') == $organization->id ? 'selected' : '' }}>{{ $organization->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="min-w-[150px]">
-                        <select name="type" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm">
-                            <option value="">All Types</option>
-                            <option value="public" {{ request('type') == 'public' ? 'selected' : '' }}>Public</option>
-                            <option value="optional" {{ request('type') == 'optional' ? 'selected' : '' }}>Optional</option>
-                            <option value="company" {{ request('type') == 'company' ? 'selected' : '' }}>Company</option>
-                        </select>
-                    </div>
-                    <x-primary-button type="submit">Filter</x-primary-button>
-                </form>
-            </div>
-
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                @if ($holidays->isEmpty())
-                    <x-empty-state title="No holidays found" description="Get started by creating your first holiday.">
-                        @can('create-holiday')
-                            <a href="{{ route('holidays.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700" wire:navigate>
-                                Create Holiday
-                            </a>
-                        @endcan
-                    </x-empty-state>
-                @else
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+        <div class="card card-hover">
+            @if ($holidays->isEmpty())
+                <div class="empty-state">
+                    <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                    <p class="text-title text-gray-900 mb-1">No holidays found</p>
+                    <p class="text-caption text-gray-500 mb-4">Get started by creating your first holiday.</p>
+                    @can('create-holiday')
+                        <a href="{{ route('holidays.create') }}" class="btn-primary" wire:navigate>Create Holiday</a>
+                    @endcan
+                </div>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Organization</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($holidays as $holiday)
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organization</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach ($holidays as $holiday)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            <a href="{{ route('holidays.show', $holiday) }}" class="text-blue-600 hover:text-blue-900" wire:navigate>{{ $holiday->name }}</a>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $holiday->date }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ ucfirst($holiday->type) }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $holiday->organization->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap"><x-status-badge :status="$holiday->is_active ? 'active' : 'inactive'" /></td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                    <td>
+                                        <a href="{{ route('holidays.show', $holiday) }}" class="text-primary-600 hover:text-primary-700 font-medium" wire:navigate>{{ $holiday->name }}</a>
+                                    </td>
+                                    <td>{{ $holiday->date }}</td>
+                                    <td><span class="badge-{{ $holiday->type === 'public' ? 'primary' : ($holiday->type === 'optional' ? 'info' : 'success') }}">{{ ucfirst($holiday->type) }}</span></td>
+                                    <td>{{ $holiday->organization->name }}</td>
+                                    <td><x-status-badge :status="$holiday->is_active ? 'active' : 'inactive'" /></td>
+                                    <td>
+                                        <div class="flex items-center gap-2">
                                             @can('view-holiday')
-                                                <a href="{{ route('holidays.show', $holiday) }}" class="text-blue-600 hover:text-blue-900" wire:navigate>View</a>
+                                                <a href="{{ route('holidays.show', $holiday) }}" class="btn-ghost text-xs px-2.5 py-1" wire:navigate>View</a>
                                             @endcan
                                             @can('update-holiday')
-                                                <a href="{{ route('holidays.edit', $holiday) }}" class="text-indigo-600 hover:text-indigo-900" wire:navigate>Edit</a>
+                                                <a href="{{ route('holidays.edit', $holiday) }}" class="btn-ghost text-xs px-2.5 py-1" wire:navigate>Edit</a>
                                             @endcan
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="px-6 py-4 border-t border-gray-200">
-                        {{ $holidays->links() }}
-                    </div>
-                @endif
-            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="px-6 py-4 border-t border-gray-100">
+                    {{ $holidays->links() }}
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

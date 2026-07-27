@@ -122,6 +122,8 @@ Route::middleware(['auth'])->group(function () {
 
     // User Management
     Route::resource('user-management', UserManagementController::class)->middleware('throttle:60,1');
+    Route::post('user-management/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('user-management.toggle-status');
+    Route::post('user-management/{user}/reset-password', [UserManagementController::class, 'resetPassword'])->name('user-management.reset-password');
 
     // Settings
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');

@@ -17,7 +17,7 @@ class UserManagementController extends Controller
 
     public function index(Request $request)
     {
-        $this->authorize('manage-users');
+        $this->authorize('view-user-management');
 
         $organizations = Organization::orderBy('name')->get();
         $branches = Branch::orderBy('name')->get();
@@ -38,7 +38,7 @@ class UserManagementController extends Controller
 
     public function create()
     {
-        $this->authorize('manage-users');
+        $this->authorize('create-user-management');
 
         $organizations = Organization::orderBy('name')->get();
         $branches = Branch::orderBy('name')->get();
@@ -49,7 +49,7 @@ class UserManagementController extends Controller
 
     public function store(StoreUserManagementRequest $request)
     {
-        $this->authorize('manage-users');
+        $this->authorize('create-user-management');
 
         $user = $this->service->create($request->validated());
 
@@ -58,18 +58,20 @@ class UserManagementController extends Controller
             ->with('success', 'User created successfully.');
     }
 
-    public function show(User $user)
+    public function show($id)
     {
-        $this->authorize('manage-users');
+        $this->authorize('view-user-management');
+        $user = User::findOrFail($id);
         $user->load(['organization', 'branch', 'roles']);
 
         return view('user-management.show', compact('user'));
     }
 
-    public function edit(User $user)
+    public function edit($id)
     {
-        $this->authorize('manage-users');
+        $this->authorize('update-user-management');
 
+        $user = User::findOrFail($id);
         $organizations = Organization::orderBy('name')->get();
         $branches = Branch::orderBy('name')->get();
         $roles = Role::orderBy('name')->get();
@@ -78,10 +80,11 @@ class UserManagementController extends Controller
         return view('user-management.edit', compact('user', 'organizations', 'branches', 'roles'));
     }
 
-    public function update(UpdateUserManagementRequest $request, User $user)
+    public function update(UpdateUserManagementRequest $request, $id)
     {
-        $this->authorize('manage-users');
+        $this->authorize('update-user-management');
 
+        $user = User::findOrFail($id);
         $this->service->update($user, $request->validated());
 
         return redirect()
@@ -89,10 +92,11 @@ class UserManagementController extends Controller
             ->with('success', 'User updated successfully.');
     }
 
-    public function toggleStatus(User $user)
+    public function toggleStatus($id)
     {
-        $this->authorize('manage-users');
+        $this->authorize('update-user-management');
 
+        $user = User::findOrFail($id);
         $this->service->toggleStatus($user);
 
         return redirect()
@@ -100,10 +104,11 @@ class UserManagementController extends Controller
             ->with('success', 'User status updated successfully.');
     }
 
-    public function resetPassword(User $user)
+    public function resetPassword($id)
     {
-        $this->authorize('manage-users');
+        $this->authorize('update-user-management');
 
+        $user = User::findOrFail($id);
         $password = $this->service->resetPassword($user);
 
         return redirect()

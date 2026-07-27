@@ -1,26 +1,30 @@
 <x-app-layout>
-    <x-page-header title="Attendance Corrections" icon="pencil-square" :breadcrumb="[
-        ['label' => 'Attendance Dashboard', 'route' => 'attendances.dashboard'],
-        ['label' => 'Corrections'],
-    ]" />
+    <x-page-header title="Attendance Corrections" icon="pencil-square">
+        <x-slot name="breadcrumb">
+            <a href="{{ route('dashboard') }}" wire:navigate>Home</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="{{ route('attendances.dashboard') }}" wire:navigate>Attendance</a>
+            <span class="breadcrumb-separator">/</span>
+            <span>Corrections</span>
+        </x-slot>
+    </x-page-header>
 
-    {{-- Filters --}}
-    <div class="card p-4 mb-6">
-        <form method="GET" class="flex flex-wrap items-end gap-4">
-            <div class="flex-1 min-w-[200px]">
-                <label class="label">Search Employee</label>
+    <div class="filter-bar">
+        <form method="GET" class="filter-bar-inner">
+            <div class="filter-group flex-1 min-w-[200px]">
+                <label class="filter-label">Search Employee</label>
                 <input type="text" name="search" value="{{ request('search') }}" class="input-field" placeholder="Name or employee code..." />
             </div>
-            <div>
-                <label class="label">From</label>
+            <div class="filter-group min-w-[160px]">
+                <label class="filter-label">From</label>
                 <input type="date" name="date_from" value="{{ request('date_from') }}" class="input-field" />
             </div>
-            <div>
-                <label class="label">To</label>
+            <div class="filter-group min-w-[160px]">
+                <label class="filter-label">To</label>
                 <input type="date" name="date_to" value="{{ request('date_to') }}" class="input-field" />
             </div>
-            <div>
-                <label class="label">Source</label>
+            <div class="filter-group min-w-[160px]">
+                <label class="filter-label">Source</label>
                 <select name="source" class="select-field">
                     <option value="">All Sources</option>
                     <option value="manual" {{ request('source') === 'manual' ? 'selected' : '' }}>Manual</option>
@@ -31,54 +35,55 @@
         </form>
     </div>
 
-    <div class="card overflow-hidden">
+    <div class="card card-hover">
         <div class="overflow-x-auto">
-            <table class="min-w-full">
+            <table class="data-table">
                 <thead>
-                    <tr class="table-header">
-                        <th class="table-header-cell">Employee</th>
-                        <th class="table-header-cell">Date</th>
-                        <th class="table-header-cell">Clock In</th>
-                        <th class="table-header-cell">Clock Out</th>
-                        <th class="table-header-cell">Hours</th>
-                        <th class="table-header-cell">Status</th>
-                        <th class="table-header-cell">Source</th>
-                        <th class="table-header-cell">Actions</th>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Date</th>
+                        <th>Clock In</th>
+                        <th>Clock Out</th>
+                        <th>Hours</th>
+                        <th>Status</th>
+                        <th>Source</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody>
                     @forelse($attendances as $attendance)
-                        <tr class="table-row">
-                            <td class="table-cell font-medium">{{ $attendance->employee->first_name ?? '' }} {{ $attendance->employee->last_name ?? '' }}</td>
-                            <td class="table-cell">{{ $attendance->date->format('M d, Y') }}</td>
-                            <td class="table-cell">{{ $attendance->clock_in ?: '-' }}</td>
-                            <td class="table-cell">{{ $attendance->clock_out ?: '-' }}</td>
-                            <td class="table-cell">{{ number_format($attendance->hours_worked, 2) }}h</td>
-                            <td class="table-cell">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                                    {{ $attendance->status === 'present' ? 'bg-emerald-100 text-emerald-700' : '' }}
-                                    {{ $attendance->status === 'late' ? 'bg-amber-100 text-amber-700' : '' }}
-                                    {{ $attendance->status === 'absent' ? 'bg-rose-100 text-rose-700' : '' }}">
+                        <tr>
+                            <td class="font-medium">{{ $attendance->employee->first_name ?? '' }} {{ $attendance->employee->last_name ?? '' }}</td>
+                            <td>{{ $attendance->date->format('M d, Y') }}</td>
+                            <td>{{ $attendance->clock_in ?: '-' }}</td>
+                            <td>{{ $attendance->clock_out ?: '-' }}</td>
+                            <td>{{ number_format($attendance->hours_worked, 2) }}h</td>
+                            <td>
+                                <span class="badge-{{ $attendance->status === 'present' ? 'success' : ($attendance->status === 'late' ? 'warning' : 'danger') }}">
                                     {{ ucfirst($attendance->status) }}
                                 </span>
                             </td>
-                            <td class="table-cell">
-                                <span class="text-xs text-gray-500">{{ ucfirst($attendance->source ?? 'manual') }}</span>
-                            </td>
-                            <td class="table-cell">
-                                <a href="{{ route('attendances.corrections.edit', $attendance) }}" class="text-indigo-600 hover:text-indigo-500 text-xs font-medium" wire:navigate>Correct</a>
+                            <td class="text-caption text-gray-500 capitalize">{{ $attendance->source ?? 'manual' }}</td>
+                            <td>
+                                <a href="{{ route('attendances.corrections.edit', $attendance) }}" class="btn-ghost text-xs px-2.5 py-1" wire:navigate>Correct</a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-6 py-12 text-center text-sm text-gray-500">No attendance records found.</td>
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" /></svg>
+                                    <p class="text-title text-gray-900 mb-1">No records found</p>
+                                    <p class="text-caption text-gray-500">No attendance records found matching your filters.</p>
+                                </div>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
         @if($attendances->hasPages())
-            <div class="px-6 py-3 border-t border-gray-100">{{ $attendances->links() }}</div>
+            <div class="px-6 py-4 border-t border-gray-100">{{ $attendances->links() }}</div>
         @endif
     </div>
 </x-app-layout>

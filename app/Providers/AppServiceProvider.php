@@ -45,15 +45,17 @@ use App\Policies\ShiftPolicy;
 use App\Policies\TenantPolicy;
 use App\Policies\WeekendPolicyPolicy;
 use App\Policies\WorkSchedulePolicy;
+use App\Services\BrandingService;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        $this->app->singleton(BrandingService::class);
     }
 
     public function boot(): void
@@ -82,5 +84,12 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(OvertimeRequest::class, OvertimeRequestPolicy::class);
         Gate::policy(LatePolicy::class, LatePolicyPolicy::class);
         Gate::policy(Leave::class, LeavePolicy::class);
+
+        View::composer('*', function ($view): void {
+            $branding = app(BrandingService::class)->all();
+
+            $view->with('branding', $branding);
+            $view->with('appName', $branding['app_name']);
+        });
     }
 }

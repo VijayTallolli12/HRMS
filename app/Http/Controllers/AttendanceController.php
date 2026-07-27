@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateAttendanceRequest;
 use App\Models\Attendance;
 use App\Models\Branch;
 use App\Models\Employee;
+use App\Models\Organization;
 use App\Services\AttendanceService;
 use Illuminate\Http\Request;
 
@@ -39,9 +40,10 @@ class AttendanceController extends Controller
     {
         $this->authorize('create', Attendance::class);
 
+        $organizations = Organization::orderBy('name')->get();
         $employees = Employee::where('status', 'active')->orderBy('first_name')->limit(200)->get();
 
-        return view('attendances.create', compact('employees'));
+        return view('attendances.create', compact('employees', 'organizations'));
     }
 
     public function store(StoreAttendanceRequest $request)
@@ -73,9 +75,10 @@ class AttendanceController extends Controller
         $attendance = is_numeric($attendance) ? $this->service->find($attendance) : $attendance;
         $this->authorize('update', $attendance);
 
+        $organizations = Organization::orderBy('name')->get();
         $employees = Employee::where('status', 'active')->orderBy('first_name')->limit(200)->get();
 
-        return view('attendances.edit', compact('attendance', 'employees'));
+        return view('attendances.edit', compact('attendance', 'employees', 'organizations'));
     }
 
     public function update(UpdateAttendanceRequest $request, $attendance)

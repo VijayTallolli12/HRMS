@@ -32,6 +32,8 @@ class AttendanceFactory extends Factory
             'late_minutes' => $lateMinutes,
             'early_leave_minutes' => 0,
             'notes' => fake()->optional()->sentence(),
+            'source' => fake()->randomElement(['manual', 'import', 'biometric']),
+            'created_at' => now(),
         ];
     }
 }

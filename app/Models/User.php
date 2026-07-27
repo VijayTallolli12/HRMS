@@ -72,6 +72,11 @@ class User extends Authenticatable
         return $query;
     }
 
+    public function getRoleAttribute(): ?string
+    {
+        return $this->getRoleNames()->first();
+    }
+
     public function isSuperAdmin(): bool
     {
         return $this->hasRole('super-admin');

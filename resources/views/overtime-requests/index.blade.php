@@ -1,102 +1,107 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Overtime Requests</h2>
+    <x-page-header title="Overtime Requests" description="Manage and review employee overtime requests." icon="clock-solid">
+        <x-slot name="breadcrumb">
+            <a href="{{ route('dashboard') }}" wire:navigate>Home</a>
+            <span class="breadcrumb-separator">/</span>
+            <span>Workforce</span>
+            <span class="breadcrumb-separator">/</span>
+            <span>Overtime Requests</span>
+        </x-slot>
+        <x-slot name="actions">
             @can('create-overtime-request')
-                <a href="{{ route('overtime-requests.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150" wire:navigate>
-                    Create Overtime Request
+                <a href="{{ route('overtime-requests.create') }}" class="btn-primary" wire:navigate>
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    Create Request
                 </a>
             @endcan
-        </div>
-    </x-slot>
+        </x-slot>
+    </x-page-header>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @if (session('success'))
-                <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-md text-green-700" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
-                    {{ session('success') }}
+    <div class="space-y-5">
+        <div class="filter-bar">
+            <form action="{{ route('overtime-requests.index') }}" method="GET" class="filter-bar-inner">
+                <div class="filter-group flex-1 min-w-[200px]">
+                    <label class="filter-label">Search</label>
+                    <input type="text" name="search" value="{{ request('search') }}" class="input-field" placeholder="Search by employee name..." />
                 </div>
-            @endif
+                <div class="filter-group min-w-[160px]">
+                    <label class="filter-label">Status</label>
+                    <select name="status" class="select-field">
+                        <option value="">All Status</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
+                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                    </select>
+                </div>
+                <div class="filter-group min-w-[180px]">
+                    <label class="filter-label">Organization</label>
+                    <select name="organization_id" class="select-field">
+                        <option value="">All Organizations</option>
+                        @foreach ($organizations as $organization)
+                            <option value="{{ $organization->id }}" {{ request('organization_id') == $organization->id ? 'selected' : '' }}>{{ $organization->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Filter</button>
+            </form>
+        </div>
 
-            <div class="mb-6">
-                <form action="{{ route('overtime-requests.index') }}" method="GET" class="flex gap-2 flex-wrap">
-                    <div class="flex-1 min-w-[200px]">
-                        <x-search-input name="search" value="{{ request('search') }}" placeholder="Search by employee name..." />
-                    </div>
-                    <div class="min-w-[160px]">
-                        <select name="status" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm">
-                            <option value="">All Status</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
-                            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
-                        </select>
-                    </div>
-                    <div class="min-w-[180px]">
-                        <select name="organization_id" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm">
-                            <option value="">All Organizations</option>
-                            @foreach ($organizations as $organization)
-                                <option value="{{ $organization->id }}" {{ request('organization_id') == $organization->id ? 'selected' : '' }}>{{ $organization->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <x-primary-button type="submit">Filter</x-primary-button>
-                </form>
-            </div>
-
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                @if ($overtimeRequests->isEmpty())
-                    <x-empty-state title="No overtime requests found" description="Get started by creating your first overtime request.">
-                        @can('create-overtime-request')
-                            <a href="{{ route('overtime-requests.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700" wire:navigate>
-                                Create Overtime Request
-                            </a>
-                        @endcan
-                    </x-empty-state>
-                @else
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+        <div class="card card-hover">
+            @if ($overtimeRequests->isEmpty())
+                <div class="empty-state">
+                    <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <p class="text-title text-gray-900 mb-1">No overtime requests found</p>
+                    <p class="text-caption text-gray-500 mb-4">Get started by creating your first overtime request.</p>
+                    @can('create-overtime-request')
+                        <a href="{{ route('overtime-requests.create') }}" class="btn-primary" wire:navigate>Create Request</a>
+                    @endcan
+                </div>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Date</th>
+                                <th>Hours</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Requested By</th>
+                                <th>Approved By</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($overtimeRequests as $overtimeRequest)
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested By</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approved By</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach ($overtimeRequests as $overtimeRequest)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            <a href="{{ route('overtime-requests.show', $overtimeRequest) }}" class="text-blue-600 hover:text-blue-900" wire:navigate>{{ $overtimeRequest->employee->first_name }} {{ $overtimeRequest->employee->last_name }}</a>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $overtimeRequest->date }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $overtimeRequest->hours }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $overtimeRequest->reason }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap"><x-status-badge :status="$overtimeRequest->status" /></td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $overtimeRequest->requester->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $overtimeRequest->approver->name ?? '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                    <td>
+                                        <a href="{{ route('overtime-requests.show', $overtimeRequest) }}" class="text-primary-600 hover:text-primary-700 font-medium" wire:navigate>{{ $overtimeRequest->employee->first_name }} {{ $overtimeRequest->employee->last_name }}</a>
+                                    </td>
+                                    <td>{{ $overtimeRequest->date }}</td>
+                                    <td>{{ $overtimeRequest->hours }}h</td>
+                                    <td class="max-w-[200px] truncate">{{ $overtimeRequest->reason }}</td>
+                                    <td><x-status-badge :status="$overtimeRequest->status" /></td>
+                                    <td>{{ $overtimeRequest->requester->name }}</td>
+                                    <td>{{ $overtimeRequest->approver->name ?? '-' }}</td>
+                                    <td>
+                                        <div class="flex items-center gap-2">
                                             @can('view-overtime-request')
-                                                <a href="{{ route('overtime-requests.show', $overtimeRequest) }}" class="text-blue-600 hover:text-blue-900" wire:navigate>View</a>
+                                                <a href="{{ route('overtime-requests.show', $overtimeRequest) }}" class="btn-ghost text-xs px-2.5 py-1" wire:navigate>View</a>
                                             @endcan
                                             @can('update-overtime-request')
-                                                <a href="{{ route('overtime-requests.edit', $overtimeRequest) }}" class="text-indigo-600 hover:text-indigo-900" wire:navigate>Edit</a>
+                                                <a href="{{ route('overtime-requests.edit', $overtimeRequest) }}" class="btn-ghost text-xs px-2.5 py-1" wire:navigate>Edit</a>
                                             @endcan
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="px-6 py-4 border-t border-gray-200">
-                        {{ $overtimeRequests->links() }}
-                    </div>
-                @endif
-            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="px-6 py-4 border-t border-gray-100">
+                    {{ $overtimeRequests->links() }}
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

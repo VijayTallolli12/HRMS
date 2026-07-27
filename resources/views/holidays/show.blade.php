@@ -1,48 +1,61 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ $holiday->name }}</h2>
-            <div class="flex gap-2">
-                @can('update-holiday')
-                    <a href="{{ route('holidays.edit', $holiday) }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700" wire:navigate>Edit</a>
-                @endcan
-                @can('delete-holiday')
-                    <x-delete-confirm route="{{ route('holidays.destroy', $holiday) }}">Delete</x-delete-confirm>
-                @endcan
+    <x-page-header title="Holiday Details" description="View complete information for this holiday." icon="cake">
+        <x-slot name="breadcrumb">
+            <a href="{{ route('dashboard') }}" wire:navigate>Home</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="{{ route('holidays.index') }}" wire:navigate>Holidays</a>
+            <span class="breadcrumb-separator">/</span>
+            <span>{{ $holiday->name }}</span>
+        </x-slot>
+        <x-slot name="actions">
+            @can('update-holiday')
+                <a href="{{ route('holidays.edit', $holiday) }}" class="btn-secondary" wire:navigate>
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                    Edit
+                </a>
+            @endcan
+            @can('delete-holiday')
+                <x-delete-confirm route="{{ route('holidays.destroy', $holiday) }}">Delete</x-delete-confirm>
+            @endcan
+        </x-slot>
+    </x-page-header>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="flex items-center gap-3">
+                <div class="flex items-center justify-center w-10 h-10 rounded-card bg-primary-50">
+                    <svg class="w-5 h-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                </div>
+                <h3 class="text-section font-semibold text-gray-900">Holiday Information</h3>
             </div>
         </div>
-    </x-slot>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Details</h3>
-                <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <dt class="text-sm font-medium text-gray-500">Name</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ $holiday->name }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm font-medium text-gray-500">Date</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ $holiday->date }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm font-medium text-gray-500">Type</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ ucfirst($holiday->type) }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm font-medium text-gray-500">Organization</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ $holiday->organization->name }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm font-medium text-gray-500">Description</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ $holiday->description }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm font-medium text-gray-500">Status</dt>
-                        <dd class="mt-1"><x-status-badge :status="$holiday->is_active ? 'active' : 'inactive'" /></dd>
-                    </div>
-                </dl>
-            </div>
+        <div class="card-body">
+            <dl class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div>
+                    <dt class="text-caption text-gray-500 mb-1">Name</dt>
+                    <dd class="text-body font-semibold text-gray-900">{{ $holiday->name }}</dd>
+                </div>
+                <div>
+                    <dt class="text-caption text-gray-500 mb-1">Date</dt>
+                    <dd class="text-body text-gray-900">{{ $holiday->date }}</dd>
+                </div>
+                <div>
+                    <dt class="text-caption text-gray-500 mb-1">Type</dt>
+                    <dd class="text-body text-gray-900">{{ ucfirst($holiday->type) }}</dd>
+                </div>
+                <div>
+                    <dt class="text-caption text-gray-500 mb-1">Organization</dt>
+                    <dd class="text-body text-gray-900">{{ $holiday->organization->name }}</dd>
+                </div>
+                <div>
+                    <dt class="text-caption text-gray-500 mb-1">Status</dt>
+                    <dd><x-status-badge :status="$holiday->is_active ? 'active' : 'inactive'" /></dd>
+                </div>
+                <div class="md:col-span-2 lg:col-span-3">
+                    <dt class="text-caption text-gray-500 mb-1">Description</dt>
+                    <dd class="text-body text-gray-900">{{ $holiday->description ?: '-' }}</dd>
+                </div>
+            </dl>
         </div>
     </div>
 </x-app-layout>

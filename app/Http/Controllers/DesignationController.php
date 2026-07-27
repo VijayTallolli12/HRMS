@@ -57,7 +57,7 @@ class DesignationController extends Controller
     public function show(Designation $designation)
     {
         $this->authorize('view', $designation);
-        $designation->load(['department', 'organization', 'employees']);
+        $designation->load(['department', 'organization']);
 
         return view('designations.show', compact('designation'));
     }

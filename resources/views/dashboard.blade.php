@@ -1,14 +1,18 @@
 <x-app-layout>
-    {{-- Welcome --}}
-    <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-900">Welcome back, {{ $user->name }}</h2>
-        <p class="mt-1 text-sm text-gray-500">
-            {{ $isSuperAdmin ? 'Here\'s what\'s happening across your organization today.' : 'Here\'s what\'s happening in your branch today.' }}
-        </p>
+    {{-- Welcome Section --}}
+    <div class="page-header mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div>
+                <h2 class="text-display font-bold text-gray-900 tracking-tight">Welcome back, {{ $user->name }}</h2>
+                <p class="mt-2 text-body text-gray-500">
+                    {{ $isSuperAdmin ? "Here's what's happening across your organization today." : "Here's what's happening in your branch today." }}
+                </p>
+            </div>
+        </div>
     </div>
 
     {{-- KPI Cards --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         <x-stat-card
             label="Total Employees"
             :value="$totalEmployees"
@@ -53,9 +57,9 @@
         @endif
     </div>
 
-    {{-- Charts Row --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <x-chart-card title="Attendance Trend (30 Days)" height="280px">
+    {{-- Charts Row 1 --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+        <x-chart-card title="Attendance Trend" height="280px">
             <canvas id="attendanceChart"></canvas>
         </x-chart-card>
         <x-chart-card title="Leave Distribution" height="280px">
@@ -63,7 +67,8 @@
         </x-chart-card>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+    {{-- Charts Row 2 --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
         <x-chart-card title="Headcount by Department" height="280px">
             <canvas id="departmentChart"></canvas>
         </x-chart-card>
@@ -72,101 +77,82 @@
         </x-chart-card>
     </div>
 
-    {{-- Quick Actions --}}
-    <div class="card p-6 mb-6">
-        <h3 class="text-sm font-semibold text-gray-900 mb-4">Quick Actions</h3>
-        <div class="flex flex-wrap gap-3">
-            @can('create-employee')
-                <a href="{{ route('employees.create') }}" class="btn-primary" wire:navigate>
-                    <x-heroicon name="user-plus" class="w-4 h-4" />
-                    Add Employee
-                </a>
-            @endcan
-            <a href="{{ route('attendances.index') }}" class="btn-secondary" wire:navigate>
-                <x-heroicon name="clock" class="w-4 h-4" />
-                View Attendance
-            </a>
-            <a href="{{ route('leaves.index') }}" class="btn-secondary" wire:navigate>
-                <x-heroicon name="calendar" class="w-4 h-4" />
-                View Leaves
-            </a>
-            @can('view-payroll-run')
-                <a href="{{ route('payroll.runs.index') }}" class="btn-secondary" wire:navigate>
-                    <x-heroicon name="currency-dollar" class="w-4 h-4" />
-                    Payroll
-                </a>
-            @endcan
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    {{-- Bottom Row: Recent Employees + Activity --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {{-- Recent Employees --}}
         <div class="card">
-            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                <h3 class="text-sm font-semibold text-gray-900">Recent Employees</h3>
-                <a href="{{ route('employees.index') }}" class="text-xs font-medium text-indigo-600 hover:text-indigo-500" wire:navigate>View all</a>
+            <div class="card-header flex items-center justify-between">
+                <h3 class="text-section font-semibold text-gray-900">Recent Employees</h3>
+                <a href="{{ route('employees.index') }}" class="text-caption font-medium text-primary-600 hover:text-primary-600/80 transition-colors" wire:navigate>View all
+                    <svg class="inline-block w-3.5 h-3.5 ml-0.5 -mt-px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                </a>
             </div>
-            @if($recentEmployees->isEmpty())
-                <x-empty-state title="No employees yet" description="Start by adding your first employee." icon="users" />
-            @else
-                <div class="divide-y divide-gray-100">
-                    @foreach($recentEmployees as $emp)
-                        <div class="px-6 py-3.5 flex items-center gap-3 hover:bg-gray-50 transition-colors">
-                            <div class="flex-shrink-0 h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center">
-                                <span class="text-xs font-bold text-indigo-600">{{ substr($emp->first_name, 0, 1) }}{{ substr($emp->last_name, 0, 1) }}</span>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-gray-900 truncate">
-                                    <a href="{{ route('employees.show', $emp) }}" class="hover:text-indigo-600" wire:navigate>{{ $emp->first_name }} {{ $emp->last_name }}</a>
-                                </p>
-                                <p class="text-xs text-gray-500 truncate">{{ $emp->department->name ?? 'No department' }} &middot; {{ $emp->branch->name ?? '' }}</p>
-                            </div>
-                            <div class="text-xs text-gray-400 whitespace-nowrap">
-                                {{ $emp->hired_at?->diffForHumans() ?? '' }}
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
+            <div class="card-body p-0">
+                @if($recentEmployees->isEmpty())
+                    <x-empty-state title="No employees yet" description="Start by adding your first employee." icon="users" />
+                @else
+                    <div class="divide-y divide-gray-50">
+                        @foreach($recentEmployees as $emp)
+                            <a href="{{ route('employees.show', $emp) }}" wire:navigate class="flex items-center gap-4 px-6 py-4 hover:bg-gray-50/60 transition-all duration-150 group">
+                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center ring-2 ring-white group-hover:ring-primary-100 transition-all">
+                                    <span class="text-caption font-bold text-primary-600">{{ substr($emp->first_name, 0, 1) }}{{ substr($emp->last_name, 0, 1) }}</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-body font-medium text-gray-900 truncate group-hover:text-primary-600 transition-colors">{{ $emp->first_name }} {{ $emp->last_name }}</p>
+                                    <p class="text-caption text-gray-400 truncate">{{ $emp->department->name ?? 'No department' }}{{ $emp->branch->name ? ' · ' . $emp->branch->name : '' }}</p>
+                                </div>
+                                <div class="flex-shrink-0 text-micro text-gray-400 whitespace-nowrap">
+                                    {{ $emp->hired_at?->diffForHumans() ?? '' }}
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
         </div>
 
         {{-- Recent Activity --}}
         <div class="card">
-            <div class="px-6 py-4 border-b border-gray-100">
-                <h3 class="text-sm font-semibold text-gray-900">Recent Activity</h3>
+            <div class="card-header">
+                <h3 class="text-section font-semibold text-gray-900">Recent Activity</h3>
             </div>
-            @if($recentActivity->isEmpty())
-                <x-empty-state title="No activity yet" description="Activity will appear here as changes are made." icon="bell" />
-            @else
-                <div class="divide-y divide-gray-100 max-h-96 overflow-y-auto">
-                    @foreach($recentActivity as $log)
-                        <div class="px-6 py-3.5 flex items-start gap-3">
-                            <div class="flex-shrink-0 mt-0.5">
-                                @if($log->event === 'created')
-                                    <div class="h-7 w-7 rounded-full bg-emerald-100 flex items-center justify-center">
-                                        <x-heroicon name="plus" class="w-3.5 h-3.5 text-emerald-600" />
+            <div class="card-body p-0">
+                @if($recentActivity->isEmpty())
+                    <x-empty-state title="No activity yet" description="Activity will appear here as changes are made." icon="bell" />
+                @else
+                    <div class="max-h-96 overflow-y-auto">
+                        <div class="px-6 py-2">
+                            @foreach($recentActivity as $log)
+                                @php
+                                    $eventColor = match($log->event) {
+                                        'created' => ['dot' => 'bg-emerald-400', 'ring' => 'bg-emerald-50'],
+                                        'updated' => ['dot' => 'bg-sky-400', 'ring' => 'bg-sky-50'],
+                                        default => ['dot' => 'bg-red-400', 'ring' => 'bg-red-50'],
+                                    };
+                                @endphp
+                                <div class="flex gap-3 {{ !$loop->last ? 'pb-4' : '' }}">
+                                    {{-- Timeline column --}}
+                                    <div class="flex flex-col items-center">
+                                        <div class="flex-shrink-0 h-2.5 w-2.5 rounded-full {{ $eventColor['dot'] }} ring-4 {{ $eventColor['ring'] }} ring-opacity-50"></div>
+                                        @if(!$loop->last)
+                                            <div class="w-px flex-1 bg-gray-100 mt-1"></div>
+                                        @endif
                                     </div>
-                                @elseif($log->event === 'updated')
-                                    <div class="h-7 w-7 rounded-full bg-sky-100 flex items-center justify-center">
-                                        <x-heroicon name="pencil" class="w-3.5 h-3.5 text-sky-600" />
+                                    {{-- Content --}}
+                                    <div class="flex-1 min-w-0 pb-0">
+                                        <p class="text-body text-gray-700 leading-relaxed">
+                                            <span class="font-medium text-gray-900">{{ $log->user->name ?? 'System' }}</span>
+                                            {{ $log->event }}d a
+                                            <span class="font-medium text-gray-900">{{ class_basename($log->auditable_type) ?? 'record' }}</span>
+                                        </p>
+                                        <p class="text-micro text-gray-400 mt-0.5">{{ $log->created_at?->diffForHumans() }}</p>
                                     </div>
-                                @else
-                                    <div class="h-7 w-7 rounded-full bg-rose-100 flex items-center justify-center">
-                                        <x-heroicon name="trash" class="w-3.5 h-3.5 text-rose-600" />
-                                    </div>
-                                @endif
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm text-gray-700">
-                                    <span class="font-medium">{{ $log->user->name ?? 'System' }}</span>
-                                    {{ $log->event }}d a {{ class_basename($log->auditable_type) ?? 'record' }}
-                                </p>
-                                <p class="text-xs text-gray-400 mt-0.5">{{ $log->created_at?->diffForHumans() }}</p>
-                            </div>
+                                </div>
+                            @endforeach
                         </div>
-                    @endforeach
-                </div>
-            @endif
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 
@@ -186,7 +172,7 @@
 
             const palette = [chartColors.indigo, chartColors.green, chartColors.amber, chartColors.sky, chartColors.rose, chartColors.purple];
 
-            Chart.defaults.font.family = 'Figtree, system-ui, sans-serif';
+            Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
             Chart.defaults.font.size = 12;
 
             // Attendance Trend

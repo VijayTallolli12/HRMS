@@ -1,57 +1,95 @@
 <x-app-layout>
-    <x-page-header title="Salary Structures" icon="heroicon-o-calculator">
-        @can('create-salary-structures')
-            <x-primary-button tag="a" href="{{ route('payroll.salary-structures.create') }}" wire:navigate>
-                <x-heroicon name="heroicon-o-plus" class="h-4 w-4" />
-                Add Structure
-            </x-primary-button>
-        @endcan
-    </x-page-header>
+    <x-slot name="header">
+        <x-page-header
+            title="Salary Structures"
+            icon="calculator"
+            description="Define and manage employee salary structures."
+        >
+            <x-slot name="breadcrumb">
+                <nav class="breadcrumb">
+                    <a href="{{ route('dashboard') }}" wire:navigate class="text-primary-600 hover:text-primary-700">Home</a>
+                    <span class="text-gray-400 mx-2">/</span>
+                    <span class="text-gray-500">Payroll</span>
+                    <span class="text-gray-400 mx-2">/</span>
+                    <span class="text-gray-900">Salary Structures</span>
+                </nav>
+            </x-slot>
+            <x-slot name="actions">
+                @can('create-salary-structure')
+                    <a href="{{ route('payroll.salary-structures.create') }}" class="btn-primary inline-flex items-center gap-2" wire:navigate>
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        Add Structure
+                    </a>
+                @endcan
+            </x-slot>
+        </x-page-header>
+    </x-slot>
 
-    <div class="card">
-        @if($structures->isEmpty())
-            <x-empty-state icon="heroicon-o-calculator" title="No salary structures" description="Define salary structures for your employees." />
-        @else
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr>
-                            <th class="table-header text-left">Employee</th>
-                            <th class="table-header text-right">Basic Salary</th>
-                            <th class="table-header text-left">Currency</th>
-                            <th class="table-header text-left">Pay Frequency</th>
-                            <th class="table-header text-left">Effective From</th>
-                            <th class="table-header text-left">Status</th>
-                            <th class="table-header text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @foreach($structures as $structure)
-                            <tr class="table-row">
-                                <td class="table-cell font-medium text-gray-900">{{ $structure->employee->name ?? '-' }}</td>
-                                <td class="table-cell text-right font-medium text-gray-900">${{ number_format($structure->basic_salary, 2) }}</td>
-                                <td class="table-cell text-gray-500">{{ $structure->currency }}</td>
-                                <td class="table-cell text-gray-500 capitalize">{{ $structure->pay_frequency }}</td>
-                                <td class="table-cell text-gray-500">{{ \Carbon\Carbon::parse($structure->effective_from)->format('M d, Y') }}</td>
-                                <td class="table-cell">
-                                    <x-status-badge :status="$structure->is_active ? 'active' : 'inactive'" />
-                                </td>
-                                <td class="table-cell text-right">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <a href="{{ route('payroll.salary-structures.edit', $structure) }}" class="btn-secondary btn-sm" wire:navigate>
-                                            <x-heroicon name="heroicon-o-pencil" class="h-4 w-4" />
-                                            Edit
-                                        </a>
-                                    </div>
-                                </td>
+    <div class="space-y-6">
+        <div class="card overflow-hidden">
+            @if($structures->isEmpty())
+                <x-empty-state
+                    icon="calculator"
+                    title="No salary structures"
+                    description="Define salary structures for your employees."
+                >
+                    @can('create-salary-structure')
+                        <a href="{{ route('payroll.salary-structures.create') }}" class="btn-primary inline-flex items-center gap-2" wire:navigate>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                            Add Structure
+                        </a>
+                    @endcan
+                </x-empty-state>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th class="text-right">Basic Salary</th>
+                                <th>Currency</th>
+                                <th>Pay Frequency</th>
+                                <th>Effective From</th>
+                                <th>Status</th>
+                                <th class="text-right">Actions</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            <div class="px-6 py-4 border-t border-gray-100">
-                {{ $structures->links() }}
-            </div>
-        @endif
+                        </thead>
+                        <tbody>
+                            @foreach($structures as $structure)
+                                <tr>
+                                    <td>
+                                        <a href="{{ route('payroll.salary-structures.show', $structure) }}" class="text-body font-medium text-gray-900 hover:text-primary-600 transition-colors" wire:navigate>
+                                            {{ $structure->employee->first_name ?? '' }} {{ $structure->employee->last_name ?? '-' }}
+                                        </a>
+                                    </td>
+                                    <td class="text-right">
+                                        <span class="text-body font-medium text-gray-900">${{ number_format($structure->basic_salary, 2) }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-body text-gray-500">{{ $structure->currency }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-body text-gray-500 capitalize">{{ $structure->pay_frequency }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-body text-gray-500">{{ \Carbon\Carbon::parse($structure->effective_from)->format('M d, Y') }}</span>
+                                    </td>
+                                    <td><x-status-badge :status="$structure->is_active ? 'active' : 'inactive'" /></td>
+                                    <td class="text-right">
+                                        <div class="flex items-center justify-end gap-3">
+                                            <a href="{{ route('payroll.salary-structures.show', $structure) }}" class="text-caption font-medium text-primary-600 hover:text-primary-700 transition-colors" wire:navigate>View</a>
+                                            <a href="{{ route('payroll.salary-structures.edit', $structure) }}" class="text-caption font-medium text-primary-600 hover:text-primary-700 transition-colors" wire:navigate>Edit</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="px-6 py-4 border-t border-gray-100">
+                    {{ $structures->links() }}
+                </div>
+            @endif
+        </div>
     </div>
 </x-app-layout>
