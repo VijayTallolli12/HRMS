@@ -47,7 +47,7 @@
                                     </button>
                                 </div>
                                 <div class="card-body">
-                                    <form action="{{ route('employees.import') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                    <form action="{{ route('employees.import.preview') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                                         @csrf
                                         <div>
                                             <label class="label" for="import_file">Select Excel/CSV File</label>
@@ -56,8 +56,18 @@
                                         </div>
                                         <div class="bg-amber-50 border border-amber-200 rounded-input p-3">
                                             <p class="text-caption text-amber-700">
-                                                <strong>Note:</strong> Use the <a href="{{ route('employees.import.template') }}" class="underline font-medium text-amber-800 hover:text-amber-900">import template</a> for correct column formatting. First row data determines organization/branch assignment.
+                                                <strong>Note:</strong> Use the <a href="{{ route('employees.import.template') }}" class="underline font-medium text-amber-800 hover:text-amber-900">import template</a> for correct column formatting. Matching is done by email or employee number.
                                             </p>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center gap-2 text-caption text-gray-600">
+                                                <input type="checkbox" name="skip_duplicates" value="1" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                                Skip duplicates (don't import rows that match existing employees)
+                                            </label>
+                                            <label class="flex items-center gap-2 text-caption text-gray-600">
+                                                <input type="checkbox" name="update_existing" value="1" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                                Update existing employees with new data
+                                            </label>
                                         </div>
                                         @error('import_file')
                                             <p class="text-sm text-red-600">{{ $message }}</p>
@@ -66,7 +76,7 @@
                                             <button type="button" @click="showImport = false" class="btn-secondary">Cancel</button>
                                             <button type="submit" class="btn-primary inline-flex items-center gap-2">
                                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-                                                Import
+                                                Preview Import
                                             </button>
                                         </div>
                                     </form>
@@ -99,6 +109,17 @@
                         <label class="filter-label">Search</label>
                         <x-search-input name="search" value="{{ request('search') }}" placeholder="Search employees..." />
                     </div>
+                    @if ($organizations->count() > 1)
+                    <div class="filter-group min-w-[180px]">
+                        <label class="filter-label">Organization</label>
+                        <select name="organization_id" class="select-field">
+                            <option value="">All Organizations</option>
+                            @foreach ($organizations as $org)
+                                <option value="{{ $org->id }}" {{ request('organization_id') == $org->id ? 'selected' : '' }}>{{ $org->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
                     <div class="filter-group min-w-[180px]">
                         <label class="filter-label">Branch</label>
                         <select name="branch_id" class="select-field">

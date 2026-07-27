@@ -148,6 +148,35 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <x-input-label for="employee_category_id" value="Employee Category" />
+                                <select id="employee_category_id" name="employee_category_id" class="select-field mt-1.5 block w-full">
+                                    <option value="">Select Category</option>
+                                    @foreach ($employeeCategories as $category)
+                                        <option value="{{ $category->id }}" {{ old('employee_category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <x-input-label for="employment_status_id" value="Employment Status" />
+                                <select id="employment_status_id" name="employment_status_id" class="select-field mt-1.5 block w-full">
+                                    <option value="">Select Status</option>
+                                    @foreach ($employmentStatuses as $status)
+                                        <option value="{{ $status->id }}" {{ old('employment_status_id') == $status->id ? 'selected' : '' }}>{{ $status->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <x-input-label for="cost_center_id" value="Cost Center" />
+                            <select id="cost_center_id" name="cost_center_id" class="select-field mt-1.5 block w-full">
+                                <option value="">Select Cost Center</option>
+                                @foreach ($costCenters as $center)
+                                    <option value="{{ $center->id }}" {{ old('cost_center_id') == $center->id ? 'selected' : '' }}>{{ $center->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                 </div>
 

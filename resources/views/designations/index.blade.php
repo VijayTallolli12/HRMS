@@ -63,6 +63,14 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="filter-group min-w-[140px]">
+                        <label class="filter-label">Status</label>
+                        <select name="status" class="select-field">
+                            <option value="">All Status</option>
+                            <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        </select>
+                    </div>
                     <div class="filter-group">
                         <label class="filter-label">&nbsp;</label>
                         <x-primary-button type="submit" class="inline-flex items-center gap-2">

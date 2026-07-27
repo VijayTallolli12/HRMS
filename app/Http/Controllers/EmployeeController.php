@@ -172,7 +172,7 @@ class EmployeeController extends Controller
             ->with('success', 'Employee deactivated successfully.');
     }
 
-    public function import(Request $request)
+    public function importPreview(Request $request)
     {
         $this->authorize('create', Employee::class);
 
@@ -180,15 +180,52 @@ class EmployeeController extends Controller
             'import_file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
         ]);
 
-        try {
-            Excel::import(new EmployeeImport($request->user()->id), $request->file('import_file'));
+        $import = new EmployeeImport($request->user()->id, ['preview' => true]);
+        Excel::import($import, $request->file('import_file'));
 
+        $previewRows = $import->getPreviewRows();
+        $skipDuplicates = $request->boolean('skip_duplicates');
+        $updateExisting = $request->boolean('update_existing');
+
+        $request->session()->put('import_file_path', $request->file('import_file')->storeAs('temp', 'employee-import-'.time().'.xlsx'));
+        $request->session()->put('import_options', compact('skipDuplicates', 'updateExisting'));
+        $request->session()->put('import_preview', $previewRows);
+
+        return view('employees.import-preview', compact('previewRows', 'skipDuplicates', 'updateExisting'));
+    }
+
+    public function importCommit(Request $request)
+    {
+        $this->authorize('create', Employee::class);
+
+        $filePath = $request->session()->get('import_file_path');
+        $options = $request->session()->get('import_options', []);
+        $skipDuplicates = $options['skipDuplicates'] ?? false;
+        $updateExisting = $options['updateExisting'] ?? false;
+
+        if (! $filePath || ! \Storage::disk('local')->exists($filePath)) {
             return redirect()
                 ->route('employees.index')
-                ->with('success', 'Employees imported successfully.');
+                ->with('error', 'Import file not found. Please upload again.');
+        }
+
+        try {
+            $fullPath = \Storage::disk('local')->path($filePath);
+            $import = new EmployeeImport($request->user()->id, [
+                'skip_duplicates' => $skipDuplicates,
+                'update_existing' => $updateExisting,
+            ]);
+            Excel::import($import, $fullPath);
+
+            \Storage::disk('local')->delete($filePath);
+            $request->session()->forget(['import_file_path', 'import_options', 'import_preview']);
+
+            $summary = $import->getImportSummary();
+
+            return view('employees.import-summary', compact('summary'));
         } catch (\Exception $e) {
             return redirect()
-                ->back()
+                ->route('employees.index')
                 ->with('error', 'Import failed: '.$e->getMessage());
         }
     }

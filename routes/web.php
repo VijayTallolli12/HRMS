@@ -138,7 +138,8 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Employee imports
-    Route::post('employees/import', [EmployeeController::class, 'import'])->name('employees.import');
+    Route::post('employees/import/preview', [EmployeeController::class, 'importPreview'])->name('employees.import.preview');
+    Route::post('employees/import/commit', [EmployeeController::class, 'importCommit'])->name('employees.import.commit');
     Route::get('employees/export', [EmployeeController::class, 'export'])->name('employees.export');
     Route::get('employees/import/template', [EmployeeController::class, 'downloadTemplate'])->name('employees.import.template');
     Route::patch('employees/{employee}/deactivate', [EmployeeController::class, 'deactivate'])->name('employees.deactivate');
