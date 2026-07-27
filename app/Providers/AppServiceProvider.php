@@ -62,7 +62,9 @@ class AppServiceProvider extends ServiceProvider
     {
         $router = $this->app->make(Router::class);
         $router->aliasMiddleware('identify.tenant', IdentifyTenant::class);
-
+        if (app()->environment('production')) {
+            URL::forceScheme('https');
+        }
         Gate::policy(Tenant::class, TenantPolicy::class);
         Gate::policy(Organization::class, OrganizationPolicy::class);
         Gate::policy(Branch::class, BranchPolicy::class);
