@@ -24,21 +24,23 @@ $iconBg = match($color) {
         <div class="flex-1 min-w-0">
             <p class="text-micro font-medium text-gray-500 uppercase tracking-wide">{{ $label }}</p>
             <p class="mt-2 text-[28px] font-bold text-gray-900 tracking-tight leading-none">{{ $value }}</p>
-            @if($trend !== null)
-                <div class="mt-2.5 flex items-center gap-1">
-                    @if($trend >= 0)
-                        <span class="inline-flex items-center text-micro font-medium text-emerald-600">
-                            <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z" clip-rule="evenodd" /></svg>
-                            {{ abs($trend) }}%
-                        </span>
-                    @else
-                        <span class="inline-flex items-center text-micro font-medium text-red-600">
-                            <svg class="w-3 h-3 mr-0.5 rotate-180" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z" clip-rule="evenodd" /></svg>
-                            {{ abs($trend) }}%
-                        </span>
+            @if($trend !== null || $trendLabel)
+                <div class="mt-2.5 flex items-center gap-1.5 flex-wrap">
+                    @if($trend !== null)
+                        @if($trend >= 0)
+                            <span class="inline-flex items-center text-micro font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                                <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z" clip-rule="evenodd" /></svg>
+                                {{ abs($trend) }}%
+                            </span>
+                        @else
+                            <span class="inline-flex items-center text-micro font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">
+                                <svg class="w-3 h-3 mr-0.5 rotate-180" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z" clip-rule="evenodd" /></svg>
+                                {{ abs($trend) }}%
+                            </span>
+                        @endif
                     @endif
                     @if($trendLabel)
-                        <span class="text-micro text-gray-400 ml-0.5">{{ $trendLabel }}</span>
+                        <span class="text-micro text-gray-500">{{ $trendLabel }}</span>
                     @endif
                 </div>
             @endif

@@ -65,15 +65,17 @@ class AttendanceDashboardController extends Controller
     {
         $data = Attendance::where('date', '>=', now()->subDays(30))
             ->when($branchId, fn ($q) => $q->whereHas('employee', fn ($eq) => $eq->where('branch_id', $branchId)))
-            ->selectRaw('date, COUNT(*) as total, SUM(CASE WHEN status != \'absent\' THEN 1 ELSE 0 END) as present')
+            ->selectRaw('date, COUNT(*) as total, SUM(CASE WHEN status != \'absent\' THEN 1 ELSE 0 END) as present, SUM(CASE WHEN status = \'late\' OR late_minutes > 0 THEN 1 ELSE 0 END) as late, SUM(CASE WHEN status = \'absent\' THEN 1 ELSE 0 END) as absent')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
         return [
             'labels' => $data->pluck('date')->map(fn ($d) => Carbon::parse($d)->format('M d'))->toArray(),
-            'present' => $data->pluck('present')->toArray(),
-            'total' => $data->pluck('total')->toArray(),
+            'present' => $data->pluck('present')->map(fn ($v) => (int) $v)->toArray(),
+            'late' => $data->pluck('late')->map(fn ($v) => (int) $v)->toArray(),
+            'absent' => $data->pluck('absent')->map(fn ($v) => (int) $v)->toArray(),
+            'total' => $data->pluck('total')->map(fn ($v) => (int) $v)->toArray(),
         ];
     }
 }

@@ -95,9 +95,7 @@
                             <td class="text-center">{{ $att ? number_format($att->hours_worked, 1).'h' : '-' }}</td>
                             <td>
                                 @if($att)
-                                    <span class="badge-{{ $att->status === 'present' ? 'success' : ($att->status === 'late' ? 'warning' : ($att->status === 'absent' ? 'danger' : ($att->status === 'half-day' ? 'info' : 'default'))) }}">
-                                        {{ ucfirst($att->status) }}
-                                    </span>
+                                    <x-status-badge :status="$att->status" />
                                 @else
                                     <span class="badge-default">No Record</span>
                                 @endif

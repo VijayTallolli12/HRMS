@@ -6,6 +6,7 @@ use App\Models\Attendance;
 use App\Models\AuditLog;
 use App\Models\Branch;
 use App\Models\Employee;
+use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\Organization;
 use Carbon\Carbon;
@@ -30,20 +31,40 @@ class DashboardService
             ->where('status', '!=', 'absent')
             ->count();
 
+        $todayLate = Attendance::whereDate('date', today())
+            ->where(function ($q) {
+                $q->where('status', 'late')->orWhere('late_minutes', '>', 0);
+            })
+            ->count();
+
+        $todayAbsent = max(0, $activeEmployees - $todayPresent);
+
         $pendingLeaves = Leave::where('status', 'pending')->count();
         $totalOrganizations = Organization::count();
         $totalBranches = Branch::count();
 
-        $attendanceRate = $totalEmployees > 0 ? round(($todayPresent / $totalEmployees) * 100) : 0;
+        $attendanceRate = $activeEmployees > 0 ? round(($todayPresent / $activeEmployees) * 100) : ($totalEmployees > 0 ? round(($todayPresent / $totalEmployees) * 100) : 0);
 
-        $recentEmployees = Employee::with(['branch', 'department'])
+        $recentEmployees = Employee::with(['branch', 'department', 'designation'])
             ->latest()
             ->limit(5)
             ->get();
 
         $recentActivity = AuditLog::with('user')
             ->latest()
-            ->limit(10)
+            ->limit(8)
+            ->get();
+
+        $upcomingLeaves = Leave::with(['employee.department'])
+            ->where('status', 'approved')
+            ->where('start_date', '>=', today())
+            ->orderBy('start_date')
+            ->limit(5)
+            ->get();
+
+        $upcomingHolidays = Holiday::where('date', '>=', today())
+            ->orderBy('date')
+            ->limit(4)
             ->get();
 
         $attendanceTrend = $this->getAttendanceTrend(30);
@@ -66,9 +87,9 @@ class DashboardService
             : ($lastMonthLeaves > 0 ? 100 : 0);
 
         return compact(
-            'totalEmployees', 'activeEmployees', 'todayPresent', 'pendingLeaves',
+            'totalEmployees', 'activeEmployees', 'todayPresent', 'todayLate', 'todayAbsent', 'pendingLeaves',
             'totalOrganizations', 'totalBranches', 'attendanceRate',
-            'recentEmployees', 'recentActivity', 'attendanceTrend',
+            'recentEmployees', 'recentActivity', 'upcomingLeaves', 'upcomingHolidays', 'attendanceTrend',
             'leaveDistribution', 'headcountByDepartment', 'headcountByStatus',
             'employeeTrend', 'leaveTrend'
         );
@@ -84,13 +105,22 @@ class DashboardService
             ->where('status', '!=', 'absent')
             ->count();
 
+        $todayLate = Attendance::whereHas('employee', fn ($q) => $q->where('branch_id', $branchId))
+            ->whereDate('date', today())
+            ->where(function ($q) {
+                $q->where('status', 'late')->orWhere('late_minutes', '>', 0);
+            })
+            ->count();
+
+        $todayAbsent = max(0, $activeEmployees - $todayPresent);
+
         $pendingLeaves = Leave::whereHas('employee', fn ($q) => $q->where('branch_id', $branchId))
             ->where('status', 'pending')
             ->count();
 
-        $attendanceRate = $totalEmployees > 0 ? round(($todayPresent / $totalEmployees) * 100) : 0;
+        $attendanceRate = $activeEmployees > 0 ? round(($todayPresent / $activeEmployees) * 100) : ($totalEmployees > 0 ? round(($todayPresent / $totalEmployees) * 100) : 0);
 
-        $recentEmployees = Employee::with(['branch', 'department'])
+        $recentEmployees = Employee::with(['branch', 'department', 'designation'])
             ->where('branch_id', $branchId)
             ->latest()
             ->limit(5)
@@ -98,7 +128,20 @@ class DashboardService
 
         $recentActivity = AuditLog::with('user')
             ->latest()
-            ->limit(10)
+            ->limit(8)
+            ->get();
+
+        $upcomingLeaves = Leave::with(['employee.department'])
+            ->whereHas('employee', fn ($q) => $q->where('branch_id', $branchId))
+            ->where('status', 'approved')
+            ->where('start_date', '>=', today())
+            ->orderBy('start_date')
+            ->limit(5)
+            ->get();
+
+        $upcomingHolidays = Holiday::where('date', '>=', today())
+            ->orderBy('date')
+            ->limit(4)
             ->get();
 
         $attendanceTrend = $this->getAttendanceTrend(30, $branchId);
@@ -128,9 +171,9 @@ class DashboardService
             : ($lastMonthLeaves > 0 ? 100 : 0);
 
         return compact(
-            'totalEmployees', 'activeEmployees', 'todayPresent', 'pendingLeaves',
+            'totalEmployees', 'activeEmployees', 'todayPresent', 'todayLate', 'todayAbsent', 'pendingLeaves',
             'totalOrganizations', 'totalBranches', 'attendanceRate',
-            'recentEmployees', 'recentActivity', 'attendanceTrend',
+            'recentEmployees', 'recentActivity', 'upcomingLeaves', 'upcomingHolidays', 'attendanceTrend',
             'leaveDistribution', 'headcountByDepartment', 'headcountByStatus',
             'employeeTrend', 'leaveTrend'
         );
@@ -144,15 +187,17 @@ class DashboardService
             $query->whereHas('employee', fn ($q) => $q->where('branch_id', $branchId));
         }
 
-        $data = $query->selectRaw('date, COUNT(*) as total, SUM(CASE WHEN status != \'absent\' THEN 1 ELSE 0 END) as present')
+        $data = $query->selectRaw('date, COUNT(*) as total, SUM(CASE WHEN status != \'absent\' THEN 1 ELSE 0 END) as present, SUM(CASE WHEN status = \'late\' OR late_minutes > 0 THEN 1 ELSE 0 END) as late, SUM(CASE WHEN status = \'absent\' THEN 1 ELSE 0 END) as absent')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
         return [
             'labels' => $data->pluck('date')->map(fn ($d) => Carbon::parse($d)->format('M d'))->toArray(),
-            'present' => $data->pluck('present')->toArray(),
-            'total' => $data->pluck('total')->toArray(),
+            'present' => $data->pluck('present')->map(fn ($v) => (int) $v)->toArray(),
+            'late' => $data->pluck('late')->map(fn ($v) => (int) $v)->toArray(),
+            'absent' => $data->pluck('absent')->map(fn ($v) => (int) $v)->toArray(),
+            'total' => $data->pluck('total')->map(fn ($v) => (int) $v)->toArray(),
         ];
     }
 
@@ -170,7 +215,7 @@ class DashboardService
             ->toArray();
 
         return [
-            'labels' => array_map(fn ($t) => ucfirst($t), array_keys($data)),
+            'labels' => array_map(fn ($t) => ucfirst(str_replace('_', ' ', $t)), array_keys($data)),
             'data' => array_values($data),
         ];
     }
@@ -209,8 +254,9 @@ class DashboardService
             ->toArray();
 
         return [
-            'labels' => array_map(fn ($s) => ucfirst($s), array_keys($data)),
+            'labels' => array_map(fn ($s) => ucfirst(str_replace('_', ' ', $s)), array_keys($data)),
             'data' => array_values($data),
         ];
     }
 }
+

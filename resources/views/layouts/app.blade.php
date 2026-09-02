@@ -68,18 +68,18 @@
 
                             {{-- Search input --}}
                             <div class="relative hidden md:flex items-center w-full max-w-[420px]">
-                                <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                                 </svg>
-                                <input type="text" placeholder="Search employees, payroll, attendance..." class="w-full h-11 pl-12 pr-24 text-sm border border-gray-200 rounded-2xl bg-gray-50 text-gray-700 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/15 focus:outline-none transition duration-150 placeholder:text-gray-400" />
-                                <span class="absolute right-4 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-500">
-                                    <span class="font-semibold">Ctrl</span>+K
+                                <input id="global-search-input" type="text" placeholder="Search employees, payroll, attendance..." class="w-full h-10 pl-11 pr-20 text-sm border border-gray-200 rounded-input bg-gray-50/80 text-gray-800 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/15 focus:outline-none transition duration-150 placeholder:text-gray-400" />
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 inline-flex items-center gap-0.5 rounded border border-gray-200 bg-white px-2 py-0.5 text-[11px] font-medium text-gray-400 shadow-xs">
+                                    <span class="font-semibold">Ctrl</span> K
                                 </span>
                             </div>
 
                             {{-- Mobile search button --}}
                             <div class="md:hidden" x-data="{ open: false }">
-                                <button type="button" x-on:click="open = !open" class="p-2 text-gray-500 hover:text-gray-700 rounded-xl hover:bg-gray-100 transition-colors">
+                                <button type="button" x-on:click="open = !open" class="p-2 text-gray-500 hover:text-gray-700 rounded-btn hover:bg-gray-100 transition-colors" aria-label="Search">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                                     </svg>
@@ -89,12 +89,12 @@
                                      x-transition:enter-start="opacity-0 scale-95 translate-y-1"
                                      x-transition:enter-end="opacity-100 scale-100 translate-y-0"
                                      x-transition:leave="transition ease-in duration-150"
-                                     class="absolute left-4 top-[72px] z-40 w-[calc(100%-2rem)] rounded-[28px] bg-white border border-gray-200 p-4 shadow-xl">
+                                     class="absolute left-4 top-[72px] z-40 w-[calc(100%-2rem)] rounded-card bg-white border border-gray-200 p-3 shadow-xl">
                                     <div class="relative">
-                                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                                         </svg>
-                                        <input type="text" placeholder="Search employees, payroll, attendance..." class="w-full h-11 pl-12 pr-4 text-sm border border-gray-200 rounded-2xl bg-gray-50 text-gray-700 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/15 focus:outline-none transition duration-150 placeholder:text-gray-400" />
+                                        <input type="text" placeholder="Search employees, payroll, attendance..." class="w-full h-10 pl-10 pr-4 text-sm border border-gray-200 rounded-input bg-gray-50 text-gray-800 focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/15 focus:outline-none transition duration-150 placeholder:text-gray-400" />
                                     </div>
                                 </div>
                             </div>
@@ -226,6 +226,17 @@
                     }
 
                     favicon.href = branding.favicon_url;
+                }
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    const searchInput = document.getElementById('global-search-input');
+                    if (searchInput) {
+                        searchInput.focus();
+                        searchInput.select();
+                    }
                 }
             });
         </script>

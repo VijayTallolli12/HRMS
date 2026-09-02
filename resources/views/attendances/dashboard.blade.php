@@ -30,8 +30,26 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
             <div class="lg:col-span-2">
-                <x-chart-card title="Attendance Trend (30 Days)" height="280px">
-                    <canvas id="attendanceTrendChart"></canvas>
+                <x-chart-card title="Attendance Trend (30 Days)" subtitle="Daily presence, late arrivals, and absences" height="300px">
+                    @if(empty($attendanceTrend['labels']) || count($attendanceTrend['labels']) === 0)
+                        <x-empty-state
+                            icon="chart-bar"
+                            title="No attendance data yet"
+                            description="No attendance records recorded for the past 30 days. Log daily attendance or import biometric records to view workforce trends."
+                            class="py-8"
+                        >
+                            <div class="flex items-center justify-center gap-3 mt-2">
+                                <a href="{{ route('attendances.daily-register') }}" class="btn-primary" wire:navigate>
+                                    Go to Daily Attendance
+                                </a>
+                                <a href="{{ route('attendances.import.create') }}" class="btn-secondary" wire:navigate>
+                                    Import Attendance
+                                </a>
+                            </div>
+                        </x-empty-state>
+                    @else
+                        <canvas id="attendanceTrendChart"></canvas>
+                    @endif
                 </x-chart-card>
             </div>
 
@@ -77,11 +95,14 @@
                     <a href="{{ route('attendances.import.history') }}" class="text-xs font-medium text-primary-600 hover:text-primary-700" wire:navigate>View all</a>
                 </div>
                 @if($recentImports->isEmpty())
-                    <div class="px-6 py-12 text-center">
-                        <svg class="w-10 h-10 text-gray-300 mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-                        <p class="text-sm text-gray-500">No imports yet.</p>
-                        <a href="{{ route('attendances.import.create') }}" class="mt-2 text-sm font-medium text-primary-600 hover:text-primary-700" wire:navigate>Import attendance →</a>
-                    </div>
+                    <x-empty-state
+                        icon="document-arrow-up"
+                        title="No imports yet"
+                        description="Import biometric or CSV attendance records to get started."
+                        class="py-8"
+                    >
+                        <a href="{{ route('attendances.import.create') }}" class="btn-secondary mt-2" wire:navigate>Import attendance →</a>
+                    </x-empty-state>
                 @else
                     <div class="divide-y divide-gray-100">
                         @foreach($recentImports as $import)
@@ -93,7 +114,7 @@
                                     <p class="text-sm font-medium text-gray-900 truncate">{{ $import->filename }}</p>
                                     <p class="text-xs text-gray-500">{{ $import->valid_rows }}/{{ $import->total_rows }} rows · {{ $import->created_at->diffForHumans() }}</p>
                                 </div>
-                                <span class="badge-{{ $import->status === 'completed' ? 'success' : ($import->status === 'preview' ? 'warning' : 'default') }}">{{ ucfirst($import->status) }}</span>
+                                <x-status-badge :status="$import->status" />
                             </div>
                         @endforeach
                     </div>
@@ -106,10 +127,14 @@
                     <a href="{{ route('attendances.daily-register', ['date' => now()->format('Y-m-d')]) }}" class="text-xs font-medium text-primary-600 hover:text-primary-700" wire:navigate>View register</a>
                 </div>
                 @if($todayEmployees->isEmpty())
-                    <div class="px-6 py-12 text-center">
-                        <svg class="w-10 h-10 text-gray-300 mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" /></svg>
-                        <p class="text-sm text-gray-500">No attendance records for today.</p>
-                    </div>
+                    <x-empty-state
+                        icon="calendar"
+                        title="No records today"
+                        description="No attendance records recorded for today yet."
+                        class="py-8"
+                    >
+                        <a href="{{ route('attendances.daily-register') }}" class="btn-secondary mt-2" wire:navigate>Open Daily Register →</a>
+                    </x-empty-state>
                 @else
                     <div class="divide-y divide-gray-100 max-h-96 overflow-y-auto">
                         @foreach($todayEmployees->take(10) as $record)
@@ -121,7 +146,7 @@
                                     <p class="text-sm font-medium text-gray-900 truncate">{{ $record->employee->first_name ?? '' }} {{ $record->employee->last_name ?? '' }}</p>
                                     <p class="text-xs text-gray-500">{{ $record->clock_in ?? '--:--' }} → {{ $record->clock_out ?? '--:--' }}</p>
                                 </div>
-                                <span class="badge-{{ $record->status === 'present' ? 'success' : ($record->status === 'late' ? 'warning' : ($record->status === 'half-day' ? 'info' : 'danger')) }}">{{ ucfirst($record->status) }}</span>
+                                <x-status-badge :status="$record->status" />
                             </div>
                         @endforeach
                     </div>
@@ -132,30 +157,96 @@
 
     @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const trendData = @json($attendanceTrend);
-            new Chart(document.getElementById('attendanceTrendChart'), {
-                type: 'line',
-                data: {
-                    labels: trendData.labels,
-                    datasets: [{
-                        label: 'Present',
-                        data: trendData.present,
-                        borderColor: 'rgba(99, 102, 241, 0.8)',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4,
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { maxTicksLimit: 7 } },
-                        y: { beginAtZero: true, grid: { color: '#f3f4f6' } }
-                    }
+        (function() {
+            function initAttendanceTrend() {
+                const canvas = document.getElementById('attendanceTrendChart');
+                if (!canvas) return;
+
+                const existing = Chart.getChart(canvas);
+                if (existing) {
+                    existing.destroy();
                 }
-            });
-        });
+
+                const trendData = @json($attendanceTrend);
+                if (!trendData.labels || trendData.labels.length === 0) return;
+
+                new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: trendData.labels,
+                        datasets: [
+                            {
+                                label: 'Present',
+                                data: trendData.present || [],
+                                borderColor: '#4f46e5',
+                                backgroundColor: 'rgba(79, 70, 229, 0.12)',
+                                fill: true,
+                                tension: 0.35,
+                                borderWidth: 2,
+                                pointRadius: 2,
+                                pointHoverRadius: 5,
+                            },
+                            {
+                                label: 'Late',
+                                data: trendData.late || [],
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'transparent',
+                                borderDash: [4, 4],
+                                tension: 0.35,
+                                borderWidth: 1.5,
+                                pointRadius: 0,
+                                pointHoverRadius: 4,
+                            },
+                            {
+                                label: 'Absent',
+                                data: trendData.absent || [],
+                                borderColor: '#f43f5e',
+                                backgroundColor: 'rgba(244, 63, 94, 0.08)',
+                                fill: false,
+                                tension: 0.35,
+                                borderWidth: 1.5,
+                                pointRadius: 0,
+                                pointHoverRadius: 4,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            intersect: false,
+                            mode: 'index',
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                align: 'end',
+                                labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, font: { size: 11 } }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { maxTicksLimit: 8, font: { size: 11 } }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: '#f1f5f9' },
+                                ticks: { precision: 0, font: { size: 11 } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (document.readyState !== 'loading') {
+                initAttendanceTrend();
+            } else {
+                document.addEventListener('DOMContentLoaded', initAttendanceTrend);
+            }
+            document.addEventListener('livewire:navigated', initAttendanceTrend);
+        })();
     </script>
     @endpush
 </x-app-layout>
