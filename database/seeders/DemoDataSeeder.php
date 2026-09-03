@@ -3,11 +3,14 @@
 namespace Database\Seeders;
 
 use App\Models\ApplicationSetting;
+use App\Models\Attendance;
 use App\Models\Branch;
 use App\Models\CostCenter;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Employee;
+use App\Models\Leave;
+use App\Models\MissingPunch;
 use App\Models\EmployeeCategory;
 use App\Models\EmployeeSalaryComponent;
 use App\Models\EmploymentStatus;
@@ -133,16 +136,27 @@ class DemoDataSeeder extends Seeder
         $orgs = $this->createOrganizations($tenant);
         $allBranches = $orgs->flatMap(fn ($o) => Branch::where('organization_id', $o->id)->get());
         $allDepts = $orgs->flatMap(fn ($o) => Department::where('organization_id', $o->id)->get());
-        $allEmployees = $this->createEmployees($orgs, $allBranches, $allDepts);
+        $allEmployees = Employee::count() > 0
+            ? Employee::all()
+            : $this->createEmployees($orgs, $allBranches, $allDepts);
+
         $this->createShiftsAndSchedules($orgs);
         $this->createHolidays($orgs);
         $this->createCostCenters($orgs, $allDepts);
-        $this->createReportingHierarchies($allEmployees);
+        if (ReportingHierarchy::count() === 0) {
+            $this->createReportingHierarchies($allEmployees);
+        }
         $this->createLeaveTypesAndBalances($orgs, $allEmployees);
-        $this->createAttendanceRecords($allEmployees);
-        $this->createLeaveRecords($allEmployees);
+        if (Attendance::count() === 0) {
+            $this->createAttendanceRecords($allEmployees);
+        }
+        if (Leave::count() === 0) {
+            $this->createLeaveRecords($allEmployees);
+        }
         $this->createSalaryStructuresAndPayroll($orgs, $allEmployees);
-        $this->createMissingPunches($allEmployees);
+        if (MissingPunch::count() === 0) {
+            $this->createMissingPunches($allEmployees);
+        }
         $this->createApplicationSettings();
 
         $this->command->info('Demo data seeded successfully!');
