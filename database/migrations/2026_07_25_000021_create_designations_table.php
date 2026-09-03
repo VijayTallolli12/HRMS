@@ -26,7 +26,7 @@ return new class extends Migration
             $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('cascade');
             $table->foreign('branch_id')->references('id')->on('branches')->onDelete('set null');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
-            $table->unique(['organization_id', 'branch_id', 'department_id', 'title']);
+            $table->unique(['organization_id', 'branch_id', 'department_id', 'title'], 'desig_org_branch_dept_title_unique');
             $table->index('department_id');
             $table->index('organization_id');
             $table->index('branch_id');
