@@ -128,8 +128,8 @@ class SettingsForm extends Component
             'settings.website' => ['nullable', 'url', 'max:255'],
             'settings.app_title' => ['nullable', 'string', 'max:255'],
             'settings.primary_color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
-            'logoUpload' => ['nullable', 'image', 'max:2048'],
-            'faviconUpload' => ['nullable', 'image', 'max:2048'],
+            'logoUpload' => ['nullable', 'image', 'mimes:png,jpg,jpeg,svg,webp', 'max:2048'],
+            'faviconUpload' => ['nullable', 'mimes:png,jpg,jpeg,ico,svg', 'max:2048'],
             'settings.smtp_host' => ['nullable', 'string', 'max:255'],
             'settings.smtp_port' => ['nullable', 'integer'],
             'settings.from_address' => ['nullable', 'email', 'max:255'],
@@ -148,6 +148,17 @@ class SettingsForm extends Component
             });
 
         return collect($rules)->only($activeFields)->all();
+    }
+
+    public function messages(): array
+    {
+        return [
+            'logoUpload.image' => 'The logo must be a valid image file.',
+            'logoUpload.mimes' => 'The logo must be a PNG, JPG, JPEG, SVG, or WebP file.',
+            'logoUpload.max' => 'The logo may not be greater than 2MB.',
+            'faviconUpload.mimes' => 'The favicon must be a PNG, JPG, JPEG, ICO, or SVG file.',
+            'faviconUpload.max' => 'The favicon may not be greater than 2MB.',
+        ];
     }
 
     private function validTab(string $tab): string

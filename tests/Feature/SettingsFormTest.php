@@ -120,4 +120,62 @@ class SettingsFormTest extends TestCase
 
         $this->assertNull(ApplicationSetting::where('key', 'smtp_host')->first());
     }
+
+    public function test_logo_and_favicon_can_be_uploaded_and_saved_to_public_disk(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $logoFile = \Illuminate\Http\UploadedFile::fake()->image('custom-logo.png', 200, 200);
+        $faviconFile = \Illuminate\Http\UploadedFile::fake()->image('custom-favicon.png', 32, 32);
+
+        Livewire::actingAs($this->user)
+            ->test(SettingsForm::class)
+            ->set('activeTab', 'branding')
+            ->set('logoUpload', $logoFile)
+            ->set('faviconUpload', $faviconFile)
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertSet('activeTab', 'branding')
+            ->assertSee('Settings updated successfully.');
+
+        $savedLogo = ApplicationSetting::get('logo')['raw'];
+        $savedFavicon = ApplicationSetting::get('favicon')['raw'];
+
+        $this->assertStringStartsWith('settings/', $savedLogo);
+        $this->assertStringStartsWith('settings/', $savedFavicon);
+
+        \Illuminate\Support\Facades\Storage::disk('public')->assertExists($savedLogo);
+        \Illuminate\Support\Facades\Storage::disk('public')->assertExists($savedFavicon);
+    }
+
+    public function test_livewire_signed_upload_endpoint_accepts_signed_url_behind_trusted_proxy(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('tmp-for-tests');
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        config(['app.url' => 'https://hrms-production-b941.up.railway.app']);
+        \Illuminate\Support\Facades\URL::forceRootUrl('https://hrms-production-b941.up.railway.app');
+        \Illuminate\Support\Facades\URL::forceScheme('https');
+
+        $file = \Illuminate\Http\UploadedFile::fake()->image('test-avatar.png', 100, 100);
+
+        // Generate signed route as Livewire does in production
+        $signedUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'livewire.upload-file',
+            now()->addMinutes(5)
+        );
+
+        $response = $this->actingAs($this->user)
+            ->withServerVariables([
+                'HTTP_X_FORWARDED_PROTO' => 'https',
+                'HTTP_X_FORWARDED_HOST' => 'hrms-production-b941.up.railway.app',
+                'HTTP_X_FORWARDED_PORT' => '443',
+            ])
+            ->post($signedUrl, [
+                'files' => [$file],
+            ]);
+
+        $response->assertOk();
+        $this->assertArrayHasKey('paths', $response->json());
+    }
 }
